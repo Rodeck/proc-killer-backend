@@ -16,15 +16,15 @@ namespace ProcastinationKiller.Controllers
     public class TodoController : Controller
     {
 
-        private readonly TodoContext _context;
+        //private readonly TodoContext _context;
         private readonly IUserService _userService;
 
-        public TodoController(TodoContext ctx, IUserService userService)
+        public TodoController(IUserService userService)
         {
-            _context = ctx;
             _userService = userService;
         }
 
+        /*
         [HttpGet]
         [Route("Get/{id:int}")]
         public async Task<ActionResult<TodoItem>> GetItem(int id)
@@ -45,6 +45,7 @@ namespace ProcastinationKiller.Controllers
 
             return items;
         }
+        */
 
         [HttpPost]
         [Route("AddTodo")]
@@ -52,19 +53,7 @@ namespace ProcastinationKiller.Controllers
         {
             try
             {
-                var newItem = new TodoItem()
-                {
-                    Description = input.Description,
-                    Completed = false,
-                    Name = input.Name,
-                    UserId = input.UserId,
-                    Regdate = DateTime.Now
-                };
-
-                //_context.Add(newItem);
-                //await _context.SaveChangesAsync();
-
-                _userService.AddTodo(newItem);
+                _userService.AddTodo(input.Description, false, input.Name, input.UserId, DateTime.Now, input.TargetDate);
 
                 return Ok();
             }

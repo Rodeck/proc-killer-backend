@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProcastinationKiller.Controllers.Abstract;
 using ProcastinationKiller.Models;
+using ProcastinationKiller.Models.Requests;
+using ProcastinationKiller.Models.Responses.Abstract;
 using ProcastinationKiller.Services;
 
 namespace ProcastinationKiller.Controllers
@@ -13,7 +16,7 @@ namespace ProcastinationKiller.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseController
     {
         private IUserService _userService;
         private UsersContext _usersContext;
@@ -25,12 +28,13 @@ namespace ProcastinationKiller.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public IActionResult Authenticate([FromBody]User userParam)
+        public IServiceResult<User> Authenticate([FromBody]LoginModel userParam)
         {
             var user = _userService.Authenticate(userParam.Username, userParam.Password);
 
             if (user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+                return null;
+                //return BadRequest(new { message = "Username or password is incorrect" });
 
             return Ok(user);
         }
@@ -48,10 +52,19 @@ namespace ProcastinationKiller.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        [AllowAnonymous]
+        public IServiceResult<object[]> GetAll()
         {
             var users = _userService.GetAll();
-            return Ok(users);
+            return Ok(users.ToArray());
+        }
+
+        [HttpGet]
+        [Route("getCallendar/{userId:int}")]
+        public IServiceResult<ICollection<Day>> GetCallendar(int userId)
+        {
+            var users = _userService.GetCallendar(userId);
+            return Ok(users); 
         }
     }
 }

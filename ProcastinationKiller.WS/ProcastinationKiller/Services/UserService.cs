@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
@@ -29,7 +30,7 @@ namespace ProcastinationKiller.Services
         /// Pobierz wszystkich użytkiowników
         /// </summary>
         /// <returns></returns>
-        IEnumerable<User> GetAll();
+        IEnumerable<object> GetAll();
 
         /// <summary>
         /// Zarejestruj nowego użytkownika
@@ -38,7 +39,16 @@ namespace ProcastinationKiller.Services
         /// <returns></returns>
         IValidationState RegisterUser(UserRegistrationModel registrationModel);
 
-        void AddTodo(TodoItem todoItem);
+        void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate);
+
+        void MarkAsCompleted(int todoId, DateTime completitionDate, int userId);
+
+        /// <summary>
+        /// Pobierz kalendarz danego użytkownika
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        ICollection<Day> GetCallendar(int userId);
     }
 
     public class UserService : IUserService
@@ -124,23 +134,82 @@ namespace ProcastinationKiller.Services
             return validationState;
         }
 
-        public IEnumerable<User> GetAll()
+        public IEnumerable<object> GetAll()
         {
             // return users without passwords
-            return _context.Users;
+            return _context.Users
+                .Include(u => u.UserTodos)
+                /*
+                .Select(u => new
+                {
+                    UserName = u.Username,
+                    Todos = u.UserTodos.Select(t => new
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Description = t.Description,
+                        Completed = t.Completed,
+                        FinishTime = t.FinishTime,
+                        TargetDate = t.TargetDate
+                    }),
+                    Regdate = u.Regdate,
+                    Callendar = u.Callendar
+                }
+                )}*/;
+        }
+
+        public ICollection<Day> GetCallendar(int userId)
+        {
+            return _context.Users.Include(u => u.UserTodos).Single(x => x.Id == userId).Callendar;
         }
 
         public void AddTodo(TodoItem todoItem)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Id == todoItem.UserId)
-                ?? throw new Exception($"No user with id: {todoItem.UserId}");
-
-            if (user.UserTodos == null)
-                user.UserTodos = new List<TodoItem>();
-
-            user.UserTodos.Add(todoItem);
+            
 
             _context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Metoda dodaje nowe todo dla użytkownika
+        /// </summary>
+        /// <param name="description"></param>
+        /// <param name="isCompleted"></param>
+        /// <param name="name"></param>
+        /// <param name="userId"></param>
+        /// <param name="regdate"></param>
+        /// <param name="targetDate"></param>
+        public void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate)
+        {
+            var user = _context.Find<User>(userId) ?? throw new Exception($"No user with id: {userId}");
+
+            if (user.UserTodos.Where(x => x.TargetDate == targetDate).Count() + 1 >= SystemSettings.MaxDayTodos)
+                throw new Exception($"Cannot add more todos for date {targetDate}");
+
+            if (targetDate.Date < DateTime.Now.Date)
+                throw new Exception("Cannot add todo for date from the past");
+
+            user.UserTodos.Add(new TodoItem()
+            {
+                Completed = false,
+                Description = description,
+                Name = name,
+                Regdate = regdate,
+                TargetDate = targetDate
+            });
+
+            var count = _context.SaveChanges();
+        }
+
+
+        public void MarkAsCompleted(int todoId, DateTime completitionDate, int userId)
+        {
+            var user = _context.Find<User>(userId) ?? throw new Exception($"No user with id: {userId}");
+
+            var todo = user.UserTodos.SingleOrDefault(x => x.Id == todoId) ?? throw new Exception($"No todo with id {todoId} for user {user.Id} found");
+
+            todo.Finish(completitionDate);
+
         }
     }
 }

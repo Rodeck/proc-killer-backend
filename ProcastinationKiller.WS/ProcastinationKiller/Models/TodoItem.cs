@@ -23,6 +23,11 @@ namespace ProcastinationKiller.Models
         public DateTime? FinishTime { get; set; }
 
         /// <summary>
+        /// Todo planowany na dzień
+        /// </summary>
+        public DateTime TargetDate { get; set; }
+
+        /// <summary>
         /// Czy zakończony
         /// </summary>
         public bool Completed { get; set; }
@@ -37,22 +42,23 @@ namespace ProcastinationKiller.Models
         /// </summary>
         public string Description { get; set; }
 
+        /*
         /// <summary>
         /// Id użytkownika
         /// </summary>
-        public User User { get; set; }
+        public virtual User User { get; set; }*/
 
         /// <summary>
         /// Zakończ dane zadanie
         /// </summary>
-        public virtual void Finish()
+        public virtual void Finish(DateTime time)
         {
             if (Completed)
                 throw new Exception("Todo already completed!");
 
             Completed = true;
 
-            FinishTime = DateTime.Now;
+            FinishTime = time;
         }
 
         /// <summary>

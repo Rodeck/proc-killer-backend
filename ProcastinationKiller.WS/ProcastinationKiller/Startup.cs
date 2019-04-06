@@ -59,7 +59,8 @@ namespace ProcastinationKiller
                 };
             });
 
-
+            services.AddScoped<IUserService, UserService>();
+            services.AddDbContext<UsersContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

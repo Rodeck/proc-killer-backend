@@ -2,6 +2,7 @@
 
 namespace ProcastinationKiller.Models
 {
+    /*
     public class TodoContext : DbContext
     {
         public TodoContext(DbContextOptions<TodoContext> options)
@@ -11,4 +12,5 @@ namespace ProcastinationKiller.Models
 
         public DbSet<TodoItem> TodoItems { get; set; }
     }
+    */
 }

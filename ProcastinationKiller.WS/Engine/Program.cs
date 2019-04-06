@@ -69,9 +69,9 @@ namespace Engine
 
         private static void ConfigureSharedServices(IServiceCollection sc)
         {
-            sc.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
+            //sc.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
             sc.AddScoped<IUserService, UserService>();
-            sc.AddDbContext<UsersContext>(opt => opt.UseInMemoryDatabase("TodoList"));
+            sc.AddDbContext<UsersContext>();
             sc.AddSingleton(new LogFactory());
         }
     }
