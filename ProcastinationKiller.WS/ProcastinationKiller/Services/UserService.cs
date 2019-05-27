@@ -3,6 +3,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
+using ProcastinationKiller.Models.Responses;
+using ProcastinationKiller.Models.Responses.Abstract;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -43,12 +45,21 @@ namespace ProcastinationKiller.Services
 
         void MarkAsCompleted(int todoId, DateTime completitionDate, int userId);
 
+        void Restore(int todoId, int userId);
+
         /// <summary>
         /// Pobierz kalendarz danego użytkownika
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
         ICollection<Day> GetCallendar(int userId);
+
+        /// <summary>
+        /// Usuń todo
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        IServiceResult DeleteTodo(int userId, int todoId, bool force = false);
     }
 
     public class UserService : IUserService
@@ -181,7 +192,7 @@ namespace ProcastinationKiller.Services
         /// <param name="targetDate"></param>
         public void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate)
         {
-            var user = _context.Find<User>(userId) ?? throw new Exception($"No user with id: {userId}");
+            var user = _context.Users.Include(u => u.UserTodos).Where(x => x.Id == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
 
             if (user.UserTodos.Where(x => x.TargetDate == targetDate).Count() + 1 >= SystemSettings.MaxDayTodos)
                 throw new Exception($"Cannot add more todos for date {targetDate}");
@@ -204,12 +215,56 @@ namespace ProcastinationKiller.Services
 
         public void MarkAsCompleted(int todoId, DateTime completitionDate, int userId)
         {
-            var user = _context.Find<User>(userId) ?? throw new Exception($"No user with id: {userId}");
+            var user =_context.Users.Include(u => u.UserTodos).Where(x => x.Id == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
 
             var todo = user.UserTodos.SingleOrDefault(x => x.Id == todoId) ?? throw new Exception($"No todo with id {todoId} for user {user.Id} found");
 
             todo.Finish(completitionDate);
 
+            _context.SaveChanges();
+        }
+
+        public void Restore(int todoId, int userId)
+        {
+            var user = _context.Users.Include(u => u.UserTodos).Where(x => x.Id == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
+
+            var todo = user.UserTodos.SingleOrDefault(x => x.Id == todoId) ?? throw new Exception($"No todo with id {todoId} for user {user.Id} found");
+
+            todo.Undo();
+
+            _context.SaveChanges();
+        }
+
+        public IServiceResult DeleteTodo(int userId, int todoId, bool force = false)
+        {
+            ServiceResult serviceResult = new ServiceResult();
+            var user = _context.Users.Include(x => x.UserTodos).SingleOrDefault(x => x.Id == userId);
+
+            if (user == null)
+            {
+                serviceResult.ValidationState.AddError("User not found", "UserId");
+                return serviceResult;
+            }
+
+            var todo = user.UserTodos.SingleOrDefault(x => x.Id == todoId);
+
+            if (todo == null)
+            {
+                serviceResult.ValidationState.AddError("Todo not found", "Todo");
+                return serviceResult;
+            }
+
+            var success = user.UserTodos.Remove(todo);
+
+            if (!success)
+            {
+                serviceResult.ValidationState.AddError("Could not delete todo", "Todo");
+                return serviceResult;
+            }
+
+            _context.SaveChanges();
+
+            return serviceResult;
         }
     }
 }

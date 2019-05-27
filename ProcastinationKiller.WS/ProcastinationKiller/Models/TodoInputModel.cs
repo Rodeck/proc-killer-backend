@@ -27,4 +27,14 @@ namespace ProcastinationKiller.Models
         /// </summary>
         public DateTime TargetDate { get; set; }
     }
+
+    public class TodoCompleteInputModel
+    {
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Id użytkownika
+        /// </summary>
+        public int UserId { get; set; }
+    }
 }

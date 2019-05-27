@@ -10,6 +10,8 @@ namespace ProcastinationKiller.Models.Responses.Abstract
         bool IsOk { get; set; }
 
         StatusCode StatusCode { get; set; }
+
+        IValidationState ValidationState { get; set; }
     }
 
     public interface IServiceResult<TResult>: IServiceResult

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcastinationKiller.Models;
+using ProcastinationKiller.Models.Responses.Abstract;
 using ProcastinationKiller.Services;
 
 namespace ProcastinationKiller.Controllers
@@ -24,29 +25,6 @@ namespace ProcastinationKiller.Controllers
             _userService = userService;
         }
 
-        /*
-        [HttpGet]
-        [Route("Get/{id:int}")]
-        public async Task<ActionResult<TodoItem>> GetItem(int id)
-        {
-            var item = await _context.TodoItems.FindAsync(id);
-
-            if (item == null)
-                return NotFound();
-
-            return item; 
-        }
-
-        [HttpGet]
-        [Route("GetAll")]
-        public TodoItem[] GetAll()
-        {
-            var items = _context.TodoItems.Select(x => x).ToArray();
-
-            return items;
-        }
-        */
-
         [HttpPost]
         [Route("AddTodo")]
         public async Task<ActionResult> AddItem([FromBody] TodoInputModel input)
@@ -61,6 +39,45 @@ namespace ProcastinationKiller.Controllers
             {
                 return ValidationProblem();
             }
+        }
+
+        [HttpPost]
+        [Route("MarkCompleted")]
+        public async Task<ActionResult> MarkCompleted([FromBody] TodoCompleteInputModel input)
+        {
+            try
+            {
+                _userService.MarkAsCompleted(input.Id, DateTime.Now, input.UserId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return ValidationProblem();
+            }
+        }
+
+        [HttpPost]
+        [Route("Restore")]
+        public async Task<ActionResult> Restore([FromBody] TodoCompleteInputModel input)
+        {
+            try
+            {
+                _userService.Restore(input.Id, input.UserId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return ValidationProblem();
+            }
+        }
+
+        [HttpDelete]
+        [Route("deleteTodo/{userId:int}/{todoId:int}")]
+        public IServiceResult DeleteTodo(int userId, int todoId)
+        {
+            return _userService.DeleteTodo(userId, todoId);
         }
     }
 }
