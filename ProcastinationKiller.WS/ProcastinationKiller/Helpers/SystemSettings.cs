@@ -8,5 +8,7 @@ namespace ProcastinationKiller.Helpers
     public static class SystemSettings
     {
         public static int MaxDayTodos => 2;
+
+        public static int PointsForCompletition => 10;
     }
 }

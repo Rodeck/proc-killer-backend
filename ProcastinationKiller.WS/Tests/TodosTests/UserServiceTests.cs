@@ -174,23 +174,17 @@ namespace TodosTests
                 DateTime.Now.AddDays(7)
             };
 
-            foreach()
+            foreach(var date in dates)
+                _userService.Authenticate("test", "test", date);
 
-            _userService.Authenticate("test", "test", dates[0]);
+            Assert.Equal(9, user.Events.Count);
+            Assert.Equal(8, user.Events.OfType<DailyLoginEvent>().Count());
+            Assert.Single(user.Events.OfType<WeeklyLoginEvent>());
 
-            Assert.Single(user.Events);
-            Assert.Single(user.Events.OfType<DailyLoginEvent>());
+            var weeklyEvent = user.Events.OfType<WeeklyLoginEvent>().Single();
 
-            var @event = user.Events.OfType<DailyLoginEvent>().Single();
-
-            Assert.Equal(DateTime.Now.Date, @event.Date.Date);
-            Assert.False(@event.Hidden);
-
-            _userService.Authenticate("test", "test", dates[1]);
-
-            Assert.Equal(2, user.Events.Count);
-            Assert.Equal(2, user.Events.OfType<DailyLoginEvent>().Count());
-
+            Assert.False(weeklyEvent.Hidden);
+            Assert.Equal(DateTime.Now.AddDays(6).Date, weeklyEvent.Date.Date);
 
             Assert.All(dates, x =>
             {

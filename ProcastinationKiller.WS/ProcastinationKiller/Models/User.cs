@@ -19,6 +19,8 @@ namespace ProcastinationKiller.Models
 
         public ICollection<BaseEvent> Events { get; set; }
 
+        public UserState CurrentState { get; set; }
+
         public User()
         {
             UserTodos = new HashSet<TodoItem>();
@@ -91,6 +93,37 @@ namespace ProcastinationKiller.Models
                 Date = currentTime,
                 Hidden = false
             });
+
+            if (ShouldAddWeeklyEvent(currentTime))
+            {
+                Events.Add(new WeeklyLoginEvent()
+                {
+                    Date = currentTime,
+                    Hidden = false
+                });
+            }
+        }
+
+        private bool ShouldAddWeeklyEvent(DateTime currentTime)
+        {
+            var expectedDates = new List<DateTime>()
+            {
+                currentTime,
+                currentTime.AddDays(-1),
+                currentTime.AddDays(-2),
+                currentTime.AddDays(-3),
+                currentTime.AddDays(-4),
+                currentTime.AddDays(-5),
+                currentTime.AddDays(-6),
+            };
+
+            var dailyLoginOperations = Events.OfType<DailyLoginEvent>().Where(x => !x.Hidden).Select(x => x.Date);
+
+            return expectedDates.All(x => dailyLoginOperations.Any(y => y.Date == x.Date))
+                && !Events.OfType<WeeklyLoginEvent>()
+                    .Any(x => 
+                        x.Date.Date >= currentTime.AddDays(-7) 
+                        && x.Date.Date <= currentTime.Date);
         }
     }
 }

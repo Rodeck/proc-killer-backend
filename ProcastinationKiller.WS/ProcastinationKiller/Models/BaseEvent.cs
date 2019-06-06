@@ -10,6 +10,7 @@ namespace ProcastinationKiller.Models
         public int Id { get; set; }
         public DateTime Date { get; set; }
         public bool Hidden { get; set; }
+        public UserState State { get; set; }
     }
 
     public class TodoCompletedEvent: BaseEvent
