@@ -30,7 +30,7 @@ namespace ProcastinationKiller.Controllers
         [HttpPost("authenticate")]
         public IServiceResult<User> Authenticate([FromBody]LoginModel userParam)
         {
-            var user = _userService.Authenticate(userParam.Username, userParam.Password);
+            var user = _userService.Authenticate(userParam.Username, userParam.Password, DateTime.Now);
 
             if (user == null)
                 return null;
@@ -65,6 +65,14 @@ namespace ProcastinationKiller.Controllers
         {
             var users = _userService.GetCallendar(userId);
             return Ok(users); 
+        }
+
+        [HttpGet]
+        [Route("getEvents/{userId:int}")]
+        public IServiceResult<ICollection<BaseEvent>> GetAllEvents(int userId)
+        {
+            var events = _userService.GetEvents(userId);
+            return events;
         }
     }
 }

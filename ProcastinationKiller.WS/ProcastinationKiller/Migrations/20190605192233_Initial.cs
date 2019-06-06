@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProcastinationKiller.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -31,6 +31,7 @@ namespace ProcastinationKiller.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Regdate = table.Column<DateTime>(nullable: false),
                     FinishTime = table.Column<DateTime>(nullable: true),
+                    TargetDate = table.Column<DateTime>(nullable: false),
                     Completed = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
@@ -47,6 +48,45 @@ namespace ProcastinationKiller.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BaseEvent",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Date = table.Column<DateTime>(nullable: false),
+                    Hidden = table.Column<bool>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    UserId = table.Column<int>(nullable: true),
+                    CompletedItemId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BaseEvent", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BaseEvent_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEvent_Todos_CompletedItemId",
+                        column: x => x.CompletedItemId,
+                        principalTable: "Todos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEvent_UserId",
+                table: "BaseEvent",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEvent_CompletedItemId",
+                table: "BaseEvent",
+                column: "CompletedItemId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Todos_UserId",
                 table: "Todos",
@@ -55,6 +95,9 @@ namespace ProcastinationKiller.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BaseEvent");
+
             migrationBuilder.DropTable(
                 name: "Todos");
 

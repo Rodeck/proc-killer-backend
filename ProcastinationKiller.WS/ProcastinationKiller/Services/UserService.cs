@@ -26,7 +26,7 @@ namespace ProcastinationKiller.Services
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        User Authenticate(string username, string password);
+        User Authenticate(string username, string password, DateTime currentTime);
 
         /// <summary>
         /// Pobierz wszystkich użytkiowników
@@ -60,6 +60,7 @@ namespace ProcastinationKiller.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         IServiceResult DeleteTodo(int userId, int todoId, bool force = false);
+        IServiceResult<ICollection<BaseEvent>> GetEvents(int userId);
     }
 
     public class UserService : IUserService
@@ -73,9 +74,9 @@ namespace ProcastinationKiller.Services
             _context = context;
         }
 
-        public User Authenticate(string username, string password)
+        public User Authenticate(string username, string password, DateTime dateTime)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Username == username && x.Password == password);
+            var user = _context.GetUserForLogin(username, password);
 
             // return null if user not found
             if (user == null)
@@ -97,8 +98,12 @@ namespace ProcastinationKiller.Services
             user.Token = tokenHandler.WriteToken(token);
 
             // remove password before returning
-            user.Password = null;
+            
 
+            user.AddDailyLoginReward(dateTime);
+
+            _context.SaveChanges();
+            user.Password = null;
             return user;
         }
 
@@ -149,24 +154,7 @@ namespace ProcastinationKiller.Services
         {
             // return users without passwords
             return _context.Users
-                .Include(u => u.UserTodos)
-                /*
-                .Select(u => new
-                {
-                    UserName = u.Username,
-                    Todos = u.UserTodos.Select(t => new
-                    {
-                        Id = t.Id,
-                        Name = t.Name,
-                        Description = t.Description,
-                        Completed = t.Completed,
-                        FinishTime = t.FinishTime,
-                        TargetDate = t.TargetDate
-                    }),
-                    Regdate = u.Regdate,
-                    Callendar = u.Callendar
-                }
-                )}*/;
+                .Include(u => u.UserTodos);
         }
 
         public ICollection<Day> GetCallendar(int userId)
@@ -176,8 +164,6 @@ namespace ProcastinationKiller.Services
 
         public void AddTodo(TodoItem todoItem)
         {
-            
-
             _context.SaveChanges();
         }
 
@@ -194,7 +180,7 @@ namespace ProcastinationKiller.Services
         {
             var user = _context.Users.Include(u => u.UserTodos).Where(x => x.Id == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
 
-            if (user.UserTodos.Where(x => x.TargetDate == targetDate).Count() + 1 >= SystemSettings.MaxDayTodos)
+            if (user.UserTodos.Where(x => x.TargetDate == targetDate).Count() + 1 > SystemSettings.MaxDayTodos)
                 throw new Exception($"Cannot add more todos for date {targetDate}");
 
             if (targetDate.Date < DateTime.Now.Date)
@@ -215,11 +201,12 @@ namespace ProcastinationKiller.Services
 
         public void MarkAsCompleted(int todoId, DateTime completitionDate, int userId)
         {
-            var user =_context.Users.Include(u => u.UserTodos).Where(x => x.Id == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
+            var user =_context.GetUserById(userId)?? throw new Exception($"No user with id: {userId}");
 
             var todo = user.UserTodos.SingleOrDefault(x => x.Id == todoId) ?? throw new Exception($"No todo with id {todoId} for user {user.Id} found");
 
             todo.Finish(completitionDate);
+            user.AddTodoCompletedEvent(todo);
 
             _context.SaveChanges();
         }
@@ -263,6 +250,22 @@ namespace ProcastinationKiller.Services
             }
 
             _context.SaveChanges();
+
+            return serviceResult;
+        }
+
+        public IServiceResult<ICollection<BaseEvent>> GetEvents(int userId)
+        {
+            ServiceResult<ICollection<BaseEvent>> serviceResult = new ServiceResult<ICollection<BaseEvent>>();
+            var user = _context.Users.Include(x => x.Events).SingleOrDefault(x => x.Id == userId);
+
+            if (user == null)
+            {
+                serviceResult.ValidationState.AddError("User not found", "UserId");
+                return serviceResult;
+            }
+
+            serviceResult.Result = user.Events;
 
             return serviceResult;
         }

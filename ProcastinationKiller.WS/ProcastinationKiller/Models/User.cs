@@ -17,6 +17,8 @@ namespace ProcastinationKiller.Models
 
         public ICollection<TodoItem> UserTodos { get; set; }
 
+        public ICollection<BaseEvent> Events { get; set; }
+
         public User()
         {
             UserTodos = new HashSet<TodoItem>();
@@ -62,6 +64,33 @@ namespace ProcastinationKiller.Models
                 if (day.AllCompleted && !todo.Completed)
                     day.AllCompleted = false;
             }
+        }
+
+        internal void AddTodoCompletedEvent(TodoItem todo)
+        {
+            if (Events.OfType<TodoCompletedEvent>().Any(x => x.CompletedItem == todo && !x.Hidden))
+            {
+                throw new Exception("User already have event about completeing this item.");
+            }
+
+            Events.Add(new TodoCompletedEvent()
+            {
+                Hidden = false,
+                Date = todo.FinishTime.Value,
+                CompletedItem = todo
+            });
+        }
+
+        internal void AddDailyLoginReward(DateTime currentTime)
+        {
+            if (Events.OfType<DailyLoginEvent>().Any(x => x.Date.Date == currentTime.Date && !x.Hidden))
+                return;
+
+            Events.Add(new DailyLoginEvent()
+            {
+                Date = currentTime,
+                Hidden = false
+            });
         }
     }
 }

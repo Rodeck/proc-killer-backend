@@ -1,3 +1,6 @@
 ProcastinationKiller.WS/.vs/ProcastinationKiller/v16/Server/sqlite3/storage.ide-wal
 ProcastinationKiller.WS/.vs/ProcastinationKiller/v16/Server/sqlite3/storage.ide-shm
 ProcastinationKiller.WS/.vs/ProcastinationKiller/v16/Server/sqlite3/db.lock
+ProcastinationKiller.WS/Tests/TodosTests/obj/
+ProcastinationKiller.WS/Tests/TodosTests/bin/
+*.db
