@@ -9,8 +9,8 @@ using ProcastinationKiller.Models;
 namespace ProcastinationKiller.Migrations
 {
     [DbContext(typeof(UsersContext))]
-    [Migration("20190605192233_Initial")]
-    partial class Initial
+    [Migration("20190613175922_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,9 +30,15 @@ namespace ProcastinationKiller.Migrations
 
                     b.Property<bool>("Hidden");
 
+                    b.Property<int?>("Points");
+
+                    b.Property<int?>("StateId");
+
                     b.Property<int?>("UserId");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StateId");
 
                     b.HasIndex("UserId");
 
@@ -72,6 +78,8 @@ namespace ProcastinationKiller.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int?>("CurrentStateId");
+
                     b.Property<string>("Password");
 
                     b.Property<DateTime>("Regdate");
@@ -82,17 +90,43 @@ namespace ProcastinationKiller.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CurrentStateId");
+
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ProcastinationKiller.Models.DailyLogin", b =>
+            modelBuilder.Entity("ProcastinationKiller.Models.UserState", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("CurrentLoginStreak");
+
+                    b.Property<int>("DailyLogins");
+
+                    b.Property<DateTime?>("LastLoginDate");
+
+                    b.Property<int>("LongestLoginStreak");
+
+                    b.Property<int>("Points");
+
+                    b.Property<int>("TotalTodosCompleted");
+
+                    b.Property<int>("WeeklyLogins");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserState");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.DailyLoginEvent", b =>
                 {
                     b.HasBaseType("ProcastinationKiller.Models.BaseEvent");
 
 
-                    b.ToTable("DailyLogin");
+                    b.ToTable("DailyLoginEvent");
 
-                    b.HasDiscriminator().HasValue("DailyLogin");
+                    b.HasDiscriminator().HasValue("DailyLoginEvent");
                 });
 
             modelBuilder.Entity("ProcastinationKiller.Models.TodoCompletedEvent", b =>
@@ -108,18 +142,22 @@ namespace ProcastinationKiller.Migrations
                     b.HasDiscriminator().HasValue("TodoCompletedEvent");
                 });
 
-            modelBuilder.Entity("ProcastinationKiller.Models.WeeklyLogin", b =>
+            modelBuilder.Entity("ProcastinationKiller.Models.WeeklyLoginEvent", b =>
                 {
                     b.HasBaseType("ProcastinationKiller.Models.BaseEvent");
 
 
-                    b.ToTable("WeeklyLogin");
+                    b.ToTable("WeeklyLoginEvent");
 
-                    b.HasDiscriminator().HasValue("WeeklyLogin");
+                    b.HasDiscriminator().HasValue("WeeklyLoginEvent");
                 });
 
             modelBuilder.Entity("ProcastinationKiller.Models.BaseEvent", b =>
                 {
+                    b.HasOne("ProcastinationKiller.Models.UserState", "State")
+                        .WithMany()
+                        .HasForeignKey("StateId");
+
                     b.HasOne("ProcastinationKiller.Models.User")
                         .WithMany("Events")
                         .HasForeignKey("UserId");
@@ -130,6 +168,13 @@ namespace ProcastinationKiller.Migrations
                     b.HasOne("ProcastinationKiller.Models.User")
                         .WithMany("UserTodos")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.User", b =>
+                {
+                    b.HasOne("ProcastinationKiller.Models.UserState", "CurrentState")
+                        .WithMany()
+                        .HasForeignKey("CurrentStateId");
                 });
 
             modelBuilder.Entity("ProcastinationKiller.Models.TodoCompletedEvent", b =>

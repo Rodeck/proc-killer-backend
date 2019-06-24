@@ -1,5 +1,7 @@
 ﻿using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
+using ProcastinationKiller.Services.Abstract;
+using ProcastinationKiller.Services.EventHandlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +9,9 @@ using System.Threading.Tasks;
 
 namespace ProcastinationKiller.Services
 {
-    public interface IStateCalculationService
-    {
-        UserState Calculate(IEnumerable<BaseEvent> baseEvents, DateTime currentTime);
-    }
-
     public class StateCalculationService : IStateCalculationService
     {
-        private Dictionary<Type, IEventCalculationHandler<BaseEvent>> _handlers = new Dictionary<Type, IEventCalculationHandler<BaseEvent>>();
+        private Dictionary<Type, Func<BaseEvent, UserState, UserState>> _handlers = new Dictionary<Type, Func<BaseEvent, UserState, UserState>>();
 
         public StateCalculationService()
         {
@@ -24,13 +21,15 @@ namespace ProcastinationKiller.Services
         private void RegisterHandlers()
         {
             AddHandler<TodoCompletedEvent, TodoCompletedCalculationHandler>();
+            AddHandler<DailyLoginEvent, DailyLoginCalculationHandler>();
         }
 
         private void AddHandler<TEvent, THandler>()
-            where THandler: IEventCalculationHandler<TEvent>
+            where THandler: IEventCalculationHandler<TEvent>, new()
             where TEvent: BaseEvent
         {
-            _handlers.Add(typeof(TEvent), Activator.CreateInstance<THandler>());
+            var handler = (THandler)Activator.CreateInstance<THandler>();
+            _handlers.Add(typeof(TEvent), (operation, state) => handler.Calculate((TEvent)operation, state));
         }
 
         public UserState Calculate(IEnumerable<BaseEvent> baseEvents, DateTime currentTime)
@@ -44,28 +43,12 @@ namespace ProcastinationKiller.Services
             foreach(var @event in eventQueue)
             {
                 var handler = _handlers[@event.GetType()];
-                @event.State = handler.Calculate(@event, UserState.Copy(lastOperation?.State ?? new UserState()));
+                @event.State = handler(@event, UserState.Copy(lastOperation?.State ?? new UserState()));
                 lastOperation = @event;
 
                 if (@event.Date <= currentTime)
                     currentState = @event.State;
             }
-
-            return currentState;
-        }
-    }
-
-    public interface IEventCalculationHandler<TEvent>
-        where TEvent: BaseEvent
-    {
-        UserState Calculate(TEvent @event, UserState currentState);
-    }
-
-    public class TodoCompletedCalculationHandler: IEventCalculationHandler<TodoCompletedEvent>
-    {
-        public UserState Calculate(TodoCompletedEvent @event, UserState currentState)
-        {
-            currentState.Points += SystemSettings.PointsForCompletition;
 
             return currentState;
         }

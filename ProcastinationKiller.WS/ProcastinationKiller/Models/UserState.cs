@@ -17,7 +17,11 @@ namespace ProcastinationKiller.Models
 
         public int LongestLoginStreak { get; set; }
 
+        public int CurrentLoginStreak { get; set; }
+
         public int TotalTodosCompleted { get; set; }
+
+        public DateTime? LastLoginDate { get; set; }
 
         public static UserState Copy(UserState otherState)
         {
@@ -27,7 +31,9 @@ namespace ProcastinationKiller.Models
                 LongestLoginStreak = otherState.LongestLoginStreak,
                 Points = otherState.Points,
                 TotalTodosCompleted = otherState.TotalTodosCompleted,
-                WeeklyLogins = otherState.WeeklyLogins
+                WeeklyLogins = otherState.WeeklyLogins,
+                CurrentLoginStreak = otherState.CurrentLoginStreak,
+                LastLoginDate = otherState.LastLoginDate
             };
         }
     }

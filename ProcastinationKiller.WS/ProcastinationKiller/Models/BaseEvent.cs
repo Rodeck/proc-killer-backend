@@ -8,9 +8,14 @@ namespace ProcastinationKiller.Models
     public abstract class BaseEvent
     {
         public int Id { get; set; }
+
         public DateTime Date { get; set; }
+
         public bool Hidden { get; set; }
+
         public UserState State { get; set; }
+
+        public int? Points { get; set; }
     }
 
     public class TodoCompletedEvent: BaseEvent

@@ -60,7 +60,8 @@ namespace ProcastinationKiller.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         IServiceResult DeleteTodo(int userId, int todoId, bool force = false);
-        IServiceResult<ICollection<BaseEvent>> GetEvents(int userId);
+        IServiceResult<ICollection<EventModel>> GetEvents(int userId);
+        IServiceResult Recalculate(int userId);
     }
 
     public class UserService : IUserService
@@ -254,9 +255,28 @@ namespace ProcastinationKiller.Services
             return serviceResult;
         }
 
-        public IServiceResult<ICollection<BaseEvent>> GetEvents(int userId)
+        public IServiceResult<ICollection<EventModel>> GetEvents(int userId)
         {
-            ServiceResult<ICollection<BaseEvent>> serviceResult = new ServiceResult<ICollection<BaseEvent>>();
+            ServiceResult<ICollection<EventModel>> serviceResult = new ServiceResult<ICollection<EventModel>>();
+            var user = _context.Users
+                .Include(x => x.Events)
+                    .ThenInclude(e => e.State)
+                .SingleOrDefault(x => x.Id == userId);
+
+            if (user == null)
+            {
+                serviceResult.ValidationState.AddError("User not found", "UserId");
+                return serviceResult;
+            }
+
+            serviceResult.Result = MapEvents(user.Events);
+
+            return serviceResult;
+        }
+
+        public IServiceResult Recalculate(int userId)
+        {
+            ServiceResult serviceResult = new ServiceResult();
             var user = _context.Users.Include(x => x.Events).SingleOrDefault(x => x.Id == userId);
 
             if (user == null)
@@ -265,9 +285,37 @@ namespace ProcastinationKiller.Services
                 return serviceResult;
             }
 
-            serviceResult.Result = user.Events;
+            user.Calculate();
+
+            _context.SaveChanges();
 
             return serviceResult;
         }
+
+        private ICollection<EventModel> MapEvents(IEnumerable<BaseEvent> baseEvents)
+        {
+            List<EventModel> result = new List<EventModel>();
+
+            foreach(var @event in baseEvents)
+            {
+                result.Add(new EventModel()
+                {
+                    EventDate = @event.Date,
+                    EventType = nameMappings[@event.GetType()],
+                    Points = @event?.Points ?? 0,
+                    PointsAfterEvent = @event.State.Points,
+                    Id = @event.Id
+                });
+            }
+
+            return result;
+        }
+
+        private static Dictionary<Type, string> nameMappings = new Dictionary<Type, string>()
+        {
+            { typeof(DailyLoginEvent), "Daily login" },
+            { typeof(TodoCompletedEvent), "Todo completed" },
+            { typeof(WeeklyLoginEvent), "Weekly login" }
+        };
     }
 }

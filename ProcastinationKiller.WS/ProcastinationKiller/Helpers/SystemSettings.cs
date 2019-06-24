@@ -10,5 +10,11 @@ namespace ProcastinationKiller.Helpers
         public static int MaxDayTodos => 2;
 
         public static int PointsForCompletition => 10;
+
+        public static int DailyLoginReward => 20;
+
+        public static decimal DailyLoginStreakMultiplier => 0.3m;
+
+        public static int DailyLoginStreakCap => 100;
     }
 }

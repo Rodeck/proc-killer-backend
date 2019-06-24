@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProcastinationKiller.Controllers.Abstract;
 using ProcastinationKiller.Models;
 using ProcastinationKiller.Models.Requests;
+using ProcastinationKiller.Models.Responses;
 using ProcastinationKiller.Models.Responses.Abstract;
 using ProcastinationKiller.Services;
 
@@ -69,10 +70,18 @@ namespace ProcastinationKiller.Controllers
 
         [HttpGet]
         [Route("getEvents/{userId:int}")]
-        public IServiceResult<ICollection<BaseEvent>> GetAllEvents(int userId)
+        public IServiceResult<ICollection<EventModel>> GetAllEvents(int userId)
         {
             var events = _userService.GetEvents(userId);
             return events;
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("recalculateEvents/{userId:int}")]
+        public IServiceResult RecalculateState(int userId)
+        {
+            return _userService.Recalculate(userId);
         }
     }
 }

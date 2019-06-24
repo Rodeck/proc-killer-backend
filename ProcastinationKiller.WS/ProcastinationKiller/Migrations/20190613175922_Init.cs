@@ -3,10 +3,29 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProcastinationKiller.Migrations
 {
-    public partial class Initial : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "UserState",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Points = table.Column<int>(nullable: false),
+                    DailyLogins = table.Column<int>(nullable: false),
+                    WeeklyLogins = table.Column<int>(nullable: false),
+                    LongestLoginStreak = table.Column<int>(nullable: false),
+                    CurrentLoginStreak = table.Column<int>(nullable: false),
+                    TotalTodosCompleted = table.Column<int>(nullable: false),
+                    LastLoginDate = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserState", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -16,11 +35,18 @@ namespace ProcastinationKiller.Migrations
                     Username = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Token = table.Column<string>(nullable: true),
-                    Regdate = table.Column<DateTime>(nullable: false)
+                    Regdate = table.Column<DateTime>(nullable: false),
+                    CurrentStateId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_UserState_CurrentStateId",
+                        column: x => x.CurrentStateId,
+                        principalTable: "UserState",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,6 +82,8 @@ namespace ProcastinationKiller.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Date = table.Column<DateTime>(nullable: false),
                     Hidden = table.Column<bool>(nullable: false),
+                    StateId = table.Column<int>(nullable: true),
+                    Points = table.Column<int>(nullable: true),
                     Discriminator = table.Column<string>(nullable: false),
                     UserId = table.Column<int>(nullable: true),
                     CompletedItemId = table.Column<int>(nullable: true)
@@ -63,6 +91,12 @@ namespace ProcastinationKiller.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BaseEvent", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BaseEvent_UserState_StateId",
+                        column: x => x.StateId,
+                        principalTable: "UserState",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BaseEvent_Users_UserId",
                         column: x => x.UserId,
@@ -78,6 +112,11 @@ namespace ProcastinationKiller.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_BaseEvent_StateId",
+                table: "BaseEvent",
+                column: "StateId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BaseEvent_UserId",
                 table: "BaseEvent",
                 column: "UserId");
@@ -91,6 +130,11 @@ namespace ProcastinationKiller.Migrations
                 name: "IX_Todos_UserId",
                 table: "Todos",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_CurrentStateId",
+                table: "Users",
+                column: "CurrentStateId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -103,6 +147,9 @@ namespace ProcastinationKiller.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "UserState");
         }
     }
 }

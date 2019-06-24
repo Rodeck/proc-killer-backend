@@ -24,7 +24,7 @@ namespace ProcastinationKiller.Models
 
         public virtual User GetUserForLogin(string username, string password)
         {
-            return Users.Include(x => x.Events).SingleOrDefault(x => x.Username == username && x.Password == password);
+            return Users.Include(x => x.Events).Include(x => x.CurrentState).SingleOrDefault(x => x.Username == username && x.Password == password);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

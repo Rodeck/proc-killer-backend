@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProcastinationKiller.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -20,6 +21,9 @@ namespace ProcastinationKiller.Models
         public ICollection<BaseEvent> Events { get; set; }
 
         public UserState CurrentState { get; set; }
+
+        // Ogarnąc jak zmusić EF do DI
+        private StateCalculationService _calculationService = new StateCalculationService();
 
         public User()
         {
@@ -75,7 +79,7 @@ namespace ProcastinationKiller.Models
                 throw new Exception("User already have event about completeing this item.");
             }
 
-            Events.Add(new TodoCompletedEvent()
+            AddEvents(new TodoCompletedEvent()
             {
                 Hidden = false,
                 Date = todo.FinishTime.Value,
@@ -88,7 +92,7 @@ namespace ProcastinationKiller.Models
             if (Events.OfType<DailyLoginEvent>().Any(x => x.Date.Date == currentTime.Date && !x.Hidden))
                 return;
 
-            Events.Add(new DailyLoginEvent()
+            AddEvents(new DailyLoginEvent()
             {
                 Date = currentTime,
                 Hidden = false
@@ -96,12 +100,24 @@ namespace ProcastinationKiller.Models
 
             if (ShouldAddWeeklyEvent(currentTime))
             {
-                Events.Add(new WeeklyLoginEvent()
+                AddEvents(new WeeklyLoginEvent()
                 {
                     Date = currentTime,
                     Hidden = false
                 });
             }
+        }
+
+        internal void AddEvents(IEnumerable<BaseEvent> events)
+        {
+            Events = Events.Concat(events).ToList();
+            this.CurrentState = _calculationService.Calculate(Events, DateTime.Now);
+        }
+
+        internal void AddEvents(BaseEvent @event)
+        {
+            Events.Add(@event);
+            this.CurrentState = _calculationService.Calculate(Events, DateTime.Now);
         }
 
         private bool ShouldAddWeeklyEvent(DateTime currentTime)
@@ -124,6 +140,11 @@ namespace ProcastinationKiller.Models
                     .Any(x => 
                         x.Date.Date >= currentTime.AddDays(-7) 
                         && x.Date.Date <= currentTime.Date);
+        }
+
+        internal void Calculate()
+        {
+            CurrentState = _calculationService.Calculate(Events, DateTime.Now);
         }
     }
 }

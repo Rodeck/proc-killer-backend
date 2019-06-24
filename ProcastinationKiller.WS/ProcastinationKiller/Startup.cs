@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
 using ProcastinationKiller.Services;
+using ProcastinationKiller.Services.Abstract;
 
 namespace ProcastinationKiller
 {
@@ -60,6 +61,7 @@ namespace ProcastinationKiller
             });
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IStatisticsService, StatisticsService>();
             services.AddDbContext<UsersContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
