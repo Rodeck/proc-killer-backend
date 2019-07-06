@@ -1,4 +1,5 @@
-﻿using ProcastinationKiller.Services;
+﻿using ProcastinationKiller.Models.Enums;
+using ProcastinationKiller.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,6 +20,10 @@ namespace ProcastinationKiller.Models
         public ICollection<TodoItem> UserTodos { get; set; }
 
         public ICollection<BaseEvent> Events { get; set; }
+
+        public UserStatus UserStatus { get; set; }
+
+        public RegistartionCode Code { get; set; }
 
         public UserState CurrentState { get; set; }
 
@@ -85,6 +90,16 @@ namespace ProcastinationKiller.Models
                 Date = todo.FinishTime.Value,
                 CompletedItem = todo
             });
+        }
+
+        public void AddCode(string code)
+        {
+            UserStatus = UserStatus.New;
+            Code = new RegistartionCode()
+            {
+                Code = code,
+                IsConfirmed = false
+            };
         }
 
         internal void AddDailyLoginReward(DateTime currentTime)

@@ -62,6 +62,12 @@ namespace ProcastinationKiller
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IStatisticsService, StatisticsService>();
+            services.AddSingleton<IMailingService, MailingService>();
+            services.Configure<MailingOptions>(opt =>
+            {
+                opt.Address = Configuration.GetValue<string>("Mail:Address");
+                opt.Password = Configuration.GetValue<string>("Mail:Password");
+            });
             services.AddDbContext<UsersContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);

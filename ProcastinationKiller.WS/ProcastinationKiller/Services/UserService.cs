@@ -145,8 +145,14 @@ namespace ProcastinationKiller.Services
                 Password = registrationModel.Password
             };
 
+            var registrationCode = "aaabbbccc";
+
+            newUser.AddCode("aaabbbccc");
+
             _context.Users.Add(newUser);
             _context.SaveChanges();
+
+
 
             return validationState;
         }

@@ -5,3 +5,5 @@ ProcastinationKiller.WS/Tests/TodosTests/obj/
 ProcastinationKiller.WS/Tests/TodosTests/bin/
 *.db
 ProcastinationKiller.WS/.vs/
+ProcastinationKiller.WS/ProcastinationKiller/appsettings.json
+ProcastinationKiller.WS/Tests/TodosTests/appsettings.Development.json

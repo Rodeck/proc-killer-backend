@@ -18,4 +18,10 @@
     <ProjectReference Include="..\..\ProcastinationKiller\ProcastinationKiller.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
