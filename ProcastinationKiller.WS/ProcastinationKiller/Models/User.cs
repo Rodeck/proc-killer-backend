@@ -15,6 +15,8 @@ namespace ProcastinationKiller.Models
         public string Password { get; set; }
         public string Token { get; set; }
 
+        public string Email { get; set; }
+
         public DateTime Regdate { get; set; }
 
         public ICollection<TodoItem> UserTodos { get; set; }
@@ -54,7 +56,33 @@ namespace ProcastinationKiller.Models
 
         private void InitializeCallendar()
         {
-            foreach(var todo in UserTodos)
+
+            int days = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
+            for(int day = 1; day <= days; day++)
+            {
+                var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, day);
+
+                if (UserTodos.Any(x => x.TargetDate.Date == date))
+                {
+                    _days.Add(new Day()
+                    {
+                        Todos = UserTodos.Where(x => x.TargetDate.Date == date).ToList(),
+                        AllCompleted = UserTodos.Where(x => x.TargetDate.Date == date).All(x => x.Completed),
+                        Date = date
+                    });
+                }
+                else
+                {
+                    _days.Add(new Day()
+                    {
+                        Date = date,
+                        Todos = new List<TodoItem>()
+                    });
+                }
+            }
+
+            foreach (var todo in UserTodos.Where(x => !(x.TargetDate.Month == DateTime.Now.Month && x.TargetDate.Year == DateTime.Now.Year)))
             {
                 Day day = _days.SingleOrDefault(x => x.Date.Date == todo.TargetDate.Date);
 

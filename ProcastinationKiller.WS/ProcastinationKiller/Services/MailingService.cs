@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using ProcastinationKiller.Models;
 using ProcastinationKiller.Services.Abstract;
 using System;
 using System.Collections.Generic;
@@ -18,37 +19,38 @@ namespace ProcastinationKiller.Services
 
     public class MailingService : IMailingService
     {
-        public string From { get; set; }
+        private MailAddress From { get; set; }
 
-        public string Password { get; set; }
+        private string Password { get; set; }
 
         public MailingService(IOptions<MailingOptions> options)
         {
-            From = options.Value.Address;
+            From = new MailAddress(options.Value.Address, options.Value.Address);
             Password = options.Value.Password;
         }
 
-        public async Task SendEmail(string body, string to)
+        public async Task SendEmail(Mail mail, string to)
         {
 
-            var fromAddress = new MailAddress(From, "ProcrastinationKiller");
             var toAddress = new MailAddress(to);
-
-            var message = new MailMessage(fromAddress, toAddress);
-
-            message.Body = body;
-            message.Subject = "Todo";
 
             var client = new SmtpClient("smtp.gmail.com", 587)
             {
-                Credentials = new NetworkCredential(From, Password),
-                EnableSsl = true,
                 UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(From.Address, Password),
+                EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                
             };
 
-            await client.SendMailAsync(message);
+            using (var message = new MailMessage(From, toAddress)
+            {
+                Subject = "ToDo",
+                Body = mail.Body,
+                IsBodyHtml = mail.IsHtml
+            })
+            {
+                await client.SendMailAsync(message);
+            }  
         }
     }
 }

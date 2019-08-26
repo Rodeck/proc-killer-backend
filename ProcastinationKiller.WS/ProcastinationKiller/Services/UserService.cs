@@ -5,6 +5,7 @@ using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
 using ProcastinationKiller.Models.Responses;
 using ProcastinationKiller.Models.Responses.Abstract;
+using ProcastinationKiller.Services.Abstract;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -39,7 +40,7 @@ namespace ProcastinationKiller.Services
         /// </summary>
         /// <param name="registrationModel"></param>
         /// <returns></returns>
-        IValidationState RegisterUser(UserRegistrationModel registrationModel);
+        Task<IValidationState> RegisterUser(UserRegistrationModel registrationModel);
 
         void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate);
 
@@ -68,11 +69,19 @@ namespace ProcastinationKiller.Services
     {
         private readonly AppSettings _appSettings;
         private readonly UsersContext _context;
+        private readonly IMailingService _mailingService;
+        private readonly IMailProvider _mailProvider;
 
-        public UserService(IOptions<AppSettings> appSettings, UsersContext context)
+        public UserService(
+            IOptions<AppSettings> appSettings,
+            UsersContext context, 
+            IMailingService mailingService,
+            IMailProvider mailProvider)
         {
             _appSettings = appSettings.Value;
             _context = context;
+            _mailingService = mailingService;
+            _mailProvider = mailProvider;
         }
 
         public User Authenticate(string username, string password, DateTime dateTime)
@@ -108,7 +117,7 @@ namespace ProcastinationKiller.Services
             return user;
         }
 
-        public IValidationState RegisterUser(UserRegistrationModel registrationModel)
+        public async Task<IValidationState> RegisterUser(UserRegistrationModel registrationModel)
         {
             ValidationState validationState = new ValidationState();
 
@@ -142,17 +151,20 @@ namespace ProcastinationKiller.Services
             {
                 Username = registrationModel.Username,
                 Regdate = DateTime.Now,
-                Password = registrationModel.Password
+                Password = registrationModel.Password,
+                Email = registrationModel.Email
             };
 
             var registrationCode = "aaabbbccc";
 
-            newUser.AddCode("aaabbbccc");
+            newUser.AddCode(registrationCode);
+
+            var mail =  await _mailProvider.GetRegistrationMailBody("http://localhost:8080/#/");
+
+            await _mailingService.SendEmail(mail, newUser.Email);
 
             _context.Users.Add(newUser);
             _context.SaveChanges();
-
-
 
             return validationState;
         }

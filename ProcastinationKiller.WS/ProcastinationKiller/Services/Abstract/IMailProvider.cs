@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace ProcastinationKiller.Services.Abstract
 {
-    public interface IMailingService
+    public interface IMailProvider
     {
-        Task SendEmail(Mail mail, string to);
+        Task<Mail> GetRegistrationMailBody(string registartionCode);
     }
 }

@@ -7,3 +7,7 @@ ProcastinationKiller.WS/Tests/TodosTests/bin/
 ProcastinationKiller.WS/.vs/
 ProcastinationKiller.WS/ProcastinationKiller/appsettings.json
 ProcastinationKiller.WS/Tests/TodosTests/appsettings.Development.json
+ProcastinationKiller.WS/Engine/bin/
+ProcastinationKiller.WS/Engine/obj/
+ProcastinationKiller.WS/ProcastinationKiller/bin/
+ProcastinationKiller.WS/ProcastinationKiller/obj/

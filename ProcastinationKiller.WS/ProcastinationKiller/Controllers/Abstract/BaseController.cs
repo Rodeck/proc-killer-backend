@@ -22,9 +22,19 @@ namespace ProcastinationKiller.Controllers.Abstract
         {
             return new ServiceResult<TResult>()
             {
-                IsOk = true,
+                IsOk = false,
                 ValidationState = new ValidationState(),
                 StatusCode = ProcastinationKiller.Models.Responses.Abstract.StatusCode.InternalServerError
+            };
+        }
+
+        public virtual IServiceResult<TResult> AuthenticationError<TResult>()
+        {
+            return new ServiceResult<TResult>()
+            {
+                IsOk = false,
+                ValidationState = new ValidationState(),
+                StatusCode = ProcastinationKiller.Models.Responses.Abstract.StatusCode.AuthenticationError
             };
         }
     }

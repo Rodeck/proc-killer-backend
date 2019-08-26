@@ -3,10 +3,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProcastinationKiller.Migrations
 {
-    public partial class Init : Migration
+    public partial class RegistrationCodes : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "RegistartionCode",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Code = table.Column<string>(nullable: true),
+                    IsConfirmed = table.Column<bool>(nullable: false),
+                    ConfirmationDate = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RegistartionCode", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "UserState",
                 columns: table => new
@@ -35,12 +50,21 @@ namespace ProcastinationKiller.Migrations
                     Username = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Token = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
                     Regdate = table.Column<DateTime>(nullable: false),
+                    UserStatus = table.Column<int>(nullable: false),
+                    CodeId = table.Column<int>(nullable: true),
                     CurrentStateId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_RegistartionCode_CodeId",
+                        column: x => x.CodeId,
+                        principalTable: "RegistartionCode",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Users_UserState_CurrentStateId",
                         column: x => x.CurrentStateId,
@@ -132,6 +156,11 @@ namespace ProcastinationKiller.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_CodeId",
+                table: "Users",
+                column: "CodeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_CurrentStateId",
                 table: "Users",
                 column: "CurrentStateId");
@@ -147,6 +176,9 @@ namespace ProcastinationKiller.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "RegistartionCode");
 
             migrationBuilder.DropTable(
                 name: "UserState");

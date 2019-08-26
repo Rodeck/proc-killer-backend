@@ -34,8 +34,6 @@ namespace ProcastinationKiller
         public void ConfigureServices(IServiceCollection services)
         {
             
-            services.AddCors();
-
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
 
@@ -60,6 +58,8 @@ namespace ProcastinationKiller
                 };
             });
 
+            services.AddScoped<IMailProvider, MailProvider>();
+            services.AddScoped<ITemplateProvider, FileTemplateProvider>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IStatisticsService, StatisticsService>();
             services.AddSingleton<IMailingService, MailingService>();
@@ -71,6 +71,13 @@ namespace ProcastinationKiller
             services.AddDbContext<UsersContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddCors(o => o.AddPolicy("any", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,10 +93,7 @@ namespace ProcastinationKiller
             }
 
             // global cors policy
-            app.UseCors(x => x
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+            app.UseCors("any");
 
             app.UseAuthentication();
 

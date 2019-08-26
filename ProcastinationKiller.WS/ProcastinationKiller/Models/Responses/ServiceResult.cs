@@ -17,5 +17,19 @@ namespace ProcastinationKiller.Models.Responses
         {
             ValidationState = new ValidationState();
         }
+
+        public void AddError(string message, string @object)
+        {
+            ValidationState.AddError(message, @object);
+        }
+    }
+
+    public static class ServiceResultExtensions
+    {
+        public static IServiceResult<TResult> AddValidationError<TResult>(this IServiceResult<TResult> result, string message, string @object)
+        {
+            result.AddError(message, @object);
+            return result;
+        }
     }
 }

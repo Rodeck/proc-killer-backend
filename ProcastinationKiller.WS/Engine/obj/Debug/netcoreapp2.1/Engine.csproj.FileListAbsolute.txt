@@ -28,3 +28,4 @@ C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKi
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.csproj.CopyComplete
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.dll
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.pdb
+C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\Assets\registration-mail.html

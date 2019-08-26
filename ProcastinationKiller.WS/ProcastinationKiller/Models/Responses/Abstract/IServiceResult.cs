@@ -12,6 +12,8 @@ namespace ProcastinationKiller.Models.Responses.Abstract
         StatusCode StatusCode { get; set; }
 
         IValidationState ValidationState { get; set; }
+
+        void AddError(string message, string @object);
     }
 
     public interface IServiceResult<TResult>: IServiceResult
@@ -22,6 +24,7 @@ namespace ProcastinationKiller.Models.Responses.Abstract
     public enum StatusCode
     {
         Ok = 200,
-        InternalServerError = 500
+        InternalServerError = 500,
+        AuthenticationError = 401,
     }
 }

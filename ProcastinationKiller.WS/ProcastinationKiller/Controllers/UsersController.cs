@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcastinationKiller.Controllers.Abstract;
@@ -34,17 +37,18 @@ namespace ProcastinationKiller.Controllers
             var user = _userService.Authenticate(userParam.Username, userParam.Password, DateTime.Now);
 
             if (user == null)
-                return null;
-                //return BadRequest(new { message = "Username or password is incorrect" });
+                return AuthenticationError<User>()
+                    .AddValidationError("Username", "Username or password incorrect.");
 
             return Ok(user);
         }
 
+        [EnableCors("any")]
         [AllowAnonymous]
         [HttpPost("Register")]
-        public IActionResult Register([FromBody]UserRegistrationModel userParam)
+        public async Task<IActionResult> Register([FromBody]UserRegistrationModel userParam)
         {
-            var validation = _userService.RegisterUser(userParam);
+            var validation = await _userService.RegisterUser(userParam);
 
             if (!validation.Success())
                 return BadRequest(validation);
@@ -82,6 +86,83 @@ namespace ProcastinationKiller.Controllers
         public IServiceResult RecalculateState(int userId)
         {
             return _userService.Recalculate(userId);
+        }
+
+        private static List<string> _urls = new List<string>()
+        {
+            "http://www.google.com",
+            "http://www.facebook.com",
+            "http://www.yahoo.com",
+            "http://www.msdn.microsoft.com.com",
+            "http://www.youtube.com",
+            "http://www.reddit.com",
+        };
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("FetchWebsites")]
+        public IServiceResult<WebResult> Fetch()
+        {
+            var watch = new Stopwatch();
+            watch.Start();
+            var result = new List<int>();
+            var client = new WebClient();
+
+            foreach(var url in _urls)
+            {
+                result.Add(client.DownloadString(url).Length);
+            }
+
+            watch.Stop();
+
+            return new ServiceResult<WebResult>()
+            {
+                Result = new WebResult()
+                {
+                    ContentLength = result,
+                    Time = watch.ElapsedMilliseconds
+                }
+            };
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("FetchWebsitesAsync")]
+        public async Task<IServiceResult<WebResult>> FetchAsync()
+        {
+            var watch = new Stopwatch();
+            watch.Start();
+            var result = new List<int>();
+            var client = new WebClient();
+
+            foreach (var url in _urls)
+            {
+                result.Add(await Task.Run(() => FetchUrl(url)));
+            }
+
+            watch.Stop();
+
+            return new ServiceResult<WebResult>()
+            {
+                Result = new WebResult()
+                {
+                    ContentLength = result,
+                    Time = watch.ElapsedMilliseconds
+                }
+            };
+        }
+
+        public async Task<int> FetchUrl(string url)
+        {
+            var client = new WebClient();
+            return (await client.DownloadStringTaskAsync(url)).Length;
+        }
+
+        public class WebResult
+        {
+            public long Time { get; set; }
+
+            public IEnumerable<int> ContentLength { get; set; }
         }
     }
 }

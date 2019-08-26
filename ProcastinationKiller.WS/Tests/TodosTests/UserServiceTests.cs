@@ -4,6 +4,7 @@ using NSubstitute.Extensions;
 using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
 using ProcastinationKiller.Services;
+using ProcastinationKiller.Services.Abstract;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,11 @@ namespace TodosTests
                 Secret = "aasdas_afassqyqw"
             });
 
-            _userService = new UserService(options, _ctx);
+            var templateProvider = new FileTemplateProvider();
+
+            var mailProvider = new MailProvider(templateProvider);
+
+            _userService = new UserService(options, _ctx, Substitute.For<IMailingService>(), mailProvider);
         }
 
         [Fact(DisplayName = "[UserService] Wykonanie todo dodaje poprawny event.")]

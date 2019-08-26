@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProcastinationKiller.Models;
 using ProcastinationKiller.Services;
 using ProcastinationKiller.Services.Abstract;
 using System;
@@ -35,7 +36,7 @@ namespace TodosTests
         [Fact]
         public async void SendMail()
         {
-            await mailingService.SendEmail("Hello world!", "pajak.gabriel@gmail.com");
+            await mailingService.SendEmail(new Mail() { Body = "Hello world!" }, "pajak.gabriel@gmail.com");
         }
     }
 }

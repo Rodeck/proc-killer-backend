@@ -9,8 +9,8 @@ using ProcastinationKiller.Models;
 namespace ProcastinationKiller.Migrations
 {
     [DbContext(typeof(UsersContext))]
-    [Migration("20190613175922_Init")]
-    partial class Init
+    [Migration("20190824140051_RegistrationCodes")]
+    partial class RegistrationCodes
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,6 +47,22 @@ namespace ProcastinationKiller.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("BaseEvent");
                 });
 
+            modelBuilder.Entity("ProcastinationKiller.Models.RegistartionCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Code");
+
+                    b.Property<DateTime?>("ConfirmationDate");
+
+                    b.Property<bool>("IsConfirmed");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RegistartionCode");
+                });
+
             modelBuilder.Entity("ProcastinationKiller.Models.TodoItem", b =>
                 {
                     b.Property<int>("Id")
@@ -78,7 +94,11 @@ namespace ProcastinationKiller.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int?>("CodeId");
+
                     b.Property<int?>("CurrentStateId");
+
+                    b.Property<string>("Email");
 
                     b.Property<string>("Password");
 
@@ -86,9 +106,13 @@ namespace ProcastinationKiller.Migrations
 
                     b.Property<string>("Token");
 
+                    b.Property<int>("UserStatus");
+
                     b.Property<string>("Username");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CodeId");
 
                     b.HasIndex("CurrentStateId");
 
@@ -172,6 +196,10 @@ namespace ProcastinationKiller.Migrations
 
             modelBuilder.Entity("ProcastinationKiller.Models.User", b =>
                 {
+                    b.HasOne("ProcastinationKiller.Models.RegistartionCode", "Code")
+                        .WithMany()
+                        .HasForeignKey("CodeId");
+
                     b.HasOne("ProcastinationKiller.Models.UserState", "CurrentState")
                         .WithMany()
                         .HasForeignKey("CurrentStateId");
