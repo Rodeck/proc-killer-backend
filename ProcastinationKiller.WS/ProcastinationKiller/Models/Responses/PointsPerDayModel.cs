@@ -11,4 +11,22 @@ namespace ProcastinationKiller.Models.Responses
 
         public int Points { get; set; }
     }
+
+    public class TodosCumulativeModel
+    {
+        public DateTime Date { get; set; }
+
+        public int TotalTodos { get; set; }
+    }
+
+    public class CumulativeResult
+    {
+        public DateTime Date { get; set; }
+
+        public int All { get; set; }
+
+        public int Completed { get; set; }
+
+        public int NotCompleted { get; set; }
+    }
 }

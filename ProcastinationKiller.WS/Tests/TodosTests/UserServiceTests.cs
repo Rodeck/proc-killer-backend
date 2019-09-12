@@ -150,8 +150,8 @@ namespace TodosTests
 
             Assert.All(dates, x =>
             {
-                var @event = user.Events.OfType<DailyLoginEvent>().SingleOrDefault(y => y.Date.Date == x.Date.Date && !y.Hidden);
-                Assert.NotNull(@event);
+                var e = user.Events.OfType<DailyLoginEvent>().SingleOrDefault(y => y.Date.Date == x.Date.Date && !y.Hidden);
+                Assert.NotNull(e);
             });
         }
 

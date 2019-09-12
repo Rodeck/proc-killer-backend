@@ -37,7 +37,21 @@ namespace ProcastinationKiller.Controllers
             {
                 return Error<PointsPerDayModel[]>(ex);
             }
-            
+        }
+
+        [HttpGet]
+        [Route("cumulative/{userId:int}")]
+        public IServiceResult<CumulativeResult[]> GetCumulativeCompletedTodos(int userId)
+        {
+            try
+            {
+                var statistics = _statisticsService.GetCumulativeCompletedTodos(userId);
+                return Ok(statistics);
+            }
+            catch (Exception ex)
+            {
+                return Error<CumulativeResult[]>(ex);
+            }
         }
     }
 }

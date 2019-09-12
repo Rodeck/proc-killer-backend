@@ -23,7 +23,6 @@ namespace ProcastinationKiller.Controllers
     public class UsersController : BaseController
     {
         private IUserService _userService;
-        private UsersContext _usersContext;
 
         public UsersController(IUserService userService)
         {

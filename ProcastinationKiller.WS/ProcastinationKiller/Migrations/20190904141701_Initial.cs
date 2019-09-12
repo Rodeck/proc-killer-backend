@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ProcastinationKiller.Migrations
 {
-    public partial class RegistrationCodes : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,7 +13,7 @@ namespace ProcastinationKiller.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Code = table.Column<string>(nullable: true),
                     IsConfirmed = table.Column<bool>(nullable: false),
                     ConfirmationDate = table.Column<DateTime>(nullable: true)
@@ -27,7 +28,7 @@ namespace ProcastinationKiller.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Points = table.Column<int>(nullable: false),
                     DailyLogins = table.Column<int>(nullable: false),
                     WeeklyLogins = table.Column<int>(nullable: false),
@@ -46,7 +47,7 @@ namespace ProcastinationKiller.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Username = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Token = table.Column<string>(nullable: true),
@@ -78,7 +79,7 @@ namespace ProcastinationKiller.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Regdate = table.Column<DateTime>(nullable: false),
                     FinishTime = table.Column<DateTime>(nullable: true),
                     TargetDate = table.Column<DateTime>(nullable: false),
@@ -103,7 +104,7 @@ namespace ProcastinationKiller.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Date = table.Column<DateTime>(nullable: false),
                     Hidden = table.Column<bool>(nullable: false),
                     StateId = table.Column<int>(nullable: true),

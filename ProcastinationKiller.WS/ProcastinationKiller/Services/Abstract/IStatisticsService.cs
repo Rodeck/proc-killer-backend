@@ -16,6 +16,7 @@ namespace ProcastinationKiller.Services.Abstract
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        PointsPerDayModel[] CalculatePointsPerDay(int userId); 
+        PointsPerDayModel[] CalculatePointsPerDay(int userId);
+        CumulativeResult[] GetCumulativeCompletedTodos(int userId);
     }
 }

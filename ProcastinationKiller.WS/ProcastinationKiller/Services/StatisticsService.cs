@@ -51,12 +51,58 @@ namespace ProcastinationKiller.Services
             return result.ToArray();
         }
 
+        public CumulativeResult[] GetCumulativeCompletedTodos(int userId)
+        {
+            var user = GetUsersTodos(userId);
+            List<CumulativeResult> result = new List<CumulativeResult>();
+
+            DateTime minDate = user.UserTodos.Min(x => x.TargetDate);
+            DateTime maxDate = user.UserTodos.Max(x => x.TargetDate);
+
+            foreach (DateTime day in EachDay(minDate, maxDate))
+            {
+                int thisDayTodos = user.UserTodos.Count(x => x.TargetDate.Date == day.Date);
+                int completed = user.UserTodos.Count(x => x.TargetDate.Date == day.Date && x.Completed);
+                int notCompleted = thisDayTodos - completed;
+                CumulativeResult todosCumulativeModel = new CumulativeResult()
+                {
+                    Date = day,
+                    Completed = result.Any()
+                        ? result.Last().Completed + completed
+                        : completed,
+                    All = result.Any()
+                        ? result.Last().All + thisDayTodos
+                        : thisDayTodos,
+                    NotCompleted = result.Any()
+                        ? result.Last().NotCompleted + notCompleted
+                        : notCompleted,
+                };
+
+                result.Add(todosCumulativeModel);
+            }
+
+            return result.ToArray();
+        }
+
         private User GetUser(int userId)
         {
             return _context.Users
                 .Include(x => x.Events)
                     .ThenInclude(e => e.State)
                 .SingleOrDefault(x => x.Id == userId);
+        }
+
+        private User GetUsersTodos(int userId)
+        {
+            return _context.Users
+                .Include(x => x.UserTodos)
+                .SingleOrDefault(x => x.Id == userId);
+        }
+
+        private IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
+        {
+            for (var day = from.Date; day.Date <= thru.Date; day = day.AddDays(1))
+                yield return day;
         }
     }
 }

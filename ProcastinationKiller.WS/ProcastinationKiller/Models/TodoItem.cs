@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace ProcastinationKiller.Models
 {
@@ -41,6 +45,28 @@ namespace ProcastinationKiller.Models
         /// Opis
         /// </summary>
         public string Description { get; set; }
+
+        [Required]
+        public string TagString
+        {
+            get { return String.Join(',', _tags); }
+            set { _tags = value.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList(); }
+        }
+
+        private IEnumerable<string> _tags { get; set; }
+
+        [NotMapped]
+        public IEnumerable<string> Tags
+        {
+            get
+            {
+                return _tags;
+            }
+            set
+            {
+                _tags = value;
+            }
+        }
 
         /*
         /// <summary>

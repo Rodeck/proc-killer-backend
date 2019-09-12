@@ -42,6 +42,7 @@ namespace ProcastinationKiller.Services
         /// <returns></returns>
         Task<IValidationState> RegisterUser(UserRegistrationModel registrationModel);
 
+
         void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate);
 
         void MarkAsCompleted(int todoId, DateTime completitionDate, int userId);
@@ -63,6 +64,13 @@ namespace ProcastinationKiller.Services
         IServiceResult DeleteTodo(int userId, int todoId, bool force = false);
         IServiceResult<ICollection<EventModel>> GetEvents(int userId);
         IServiceResult Recalculate(int userId);
+
+        /// <summary>
+        /// Add tag to todo
+        /// </summary>
+        /// <param name="todoId"></param>
+        /// <param name="tag"></param>
+        Task AddTag(int todoId, string tag);
     }
 
     public class UserService : IUserService
@@ -327,6 +335,16 @@ namespace ProcastinationKiller.Services
             }
 
             return result;
+        }
+
+        public async Task AddTag(int todoId, string tag)
+        {
+            var todo =  await _context.Todos.SingleOrDefaultAsync(x => x.Id == todoId);
+
+            if (todo == null)
+                throw new Exception($"Could not find todo with id {todoId}");
+
+            todo.Tags = todo.Tags.Concat(new string[] { tag });
         }
 
         private static Dictionary<Type, string> nameMappings = new Dictionary<Type, string>()

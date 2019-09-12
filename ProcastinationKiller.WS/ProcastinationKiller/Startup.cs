@@ -68,7 +68,9 @@ namespace ProcastinationKiller
                 opt.Address = Configuration.GetValue<string>("Mail:Address");
                 opt.Password = Configuration.GetValue<string>("Mail:Password");
             });
-            services.AddDbContext<UsersContext>();
+            //services.AddDbContext<UsersContext>();
+            services.AddEntityFrameworkNpgsql()
+                .AddDbContext<UsersContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("SystemDb")));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 

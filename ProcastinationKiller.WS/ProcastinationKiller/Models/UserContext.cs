@@ -8,9 +8,10 @@ namespace ProcastinationKiller.Models
 {
     public class UsersContext : DbContext
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public UsersContext(DbContextOptions<UsersContext> opt)
+            : base(opt)
         {
-            optionsBuilder.UseSqlite("Data Source=systemdb.db");
+
         }
 
         public virtual DbSet<User> Users { get; set; }

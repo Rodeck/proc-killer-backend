@@ -42,6 +42,22 @@ namespace ProcastinationKiller.Controllers
         }
 
         [HttpPost]
+        [Route("AddTag")]
+        public async Task<ActionResult> AddTag(int todoId, string tag)
+        {
+            try
+            {
+                await _userService.AddTag(todoId, tag);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return ValidationProblem();
+            }
+        }
+
+        [HttpPost]
         [Route("MarkCompleted")]
         public async Task<ActionResult> MarkCompleted([FromBody] TodoCompleteInputModel input)
         {

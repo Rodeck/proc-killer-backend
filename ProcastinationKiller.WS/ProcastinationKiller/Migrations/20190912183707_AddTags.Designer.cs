@@ -4,19 +4,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProcastinationKiller.Models;
 
 namespace ProcastinationKiller.Migrations
 {
     [DbContext(typeof(UsersContext))]
-    [Migration("20190824140051_RegistrationCodes")]
-    partial class RegistrationCodes
+    [Migration("20190912183707_AddTags")]
+    partial class AddTags
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.8-servicing-32085");
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
+                .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("ProcastinationKiller.Models.BaseEvent", b =>
                 {
@@ -77,6 +80,9 @@ namespace ProcastinationKiller.Migrations
                     b.Property<string>("Name");
 
                     b.Property<DateTime>("Regdate");
+
+                    b.Property<string>("TagString")
+                        .IsRequired();
 
                     b.Property<DateTime>("TargetDate");
 
