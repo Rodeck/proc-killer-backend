@@ -23,6 +23,8 @@ namespace ProcastinationKiller.Models
 
         public DateTime? LastLoginDate { get; set; }
 
+        public Level Level { get; set; }
+
         public static UserState Copy(UserState otherState)
         {
             return new UserState()
@@ -33,7 +35,14 @@ namespace ProcastinationKiller.Models
                 TotalTodosCompleted = otherState.TotalTodosCompleted,
                 WeeklyLogins = otherState.WeeklyLogins,
                 CurrentLoginStreak = otherState.CurrentLoginStreak,
-                LastLoginDate = otherState.LastLoginDate
+                LastLoginDate = otherState.LastLoginDate,
+                Level = otherState.Level != null ? new Level()
+                {
+                    RequiredExp = otherState.Level.RequiredExp,
+                    CurrentExp = otherState.Level.CurrentExp,
+                    Number = otherState.Level.Number,
+                    Definition = otherState.Level.Definition,
+                } : null
             };
         }
     }

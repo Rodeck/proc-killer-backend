@@ -30,7 +30,7 @@ namespace ProcastinationKiller.Models
         public UserState CurrentState { get; set; }
 
         // Ogarnąc jak zmusić EF do DI
-        private StateCalculationService _calculationService = new StateCalculationService();
+        public StateCalculationService CalculationService;
 
         public User()
         {
@@ -130,6 +130,23 @@ namespace ProcastinationKiller.Models
             };
         }
 
+        /// <summary>
+        /// Aktywuj konto użytkownika
+        /// </summary>
+        /// <param name="code"></param>
+        public void Activate(string code)
+        {
+            if (this.Code.Code == code)
+            {
+                UserStatus = UserStatus.Confirmed;
+                Code.Confirm();
+            }
+            else
+            {
+                throw new Exception("Provided activation code is invalid.");
+            }
+        }
+
         internal void AddDailyLoginReward(DateTime currentTime)
         {
             if (Events.OfType<DailyLoginEvent>().Any(x => x.Date.Date == currentTime.Date && !x.Hidden))
@@ -154,13 +171,13 @@ namespace ProcastinationKiller.Models
         internal void AddEvents(IEnumerable<BaseEvent> events)
         {
             Events = Events.Concat(events).ToList();
-            this.CurrentState = _calculationService.Calculate(Events, DateTime.Now);
+            this.CurrentState = CalculationService.Calculate(Events, DateTime.Now);
         }
 
         internal void AddEvents(BaseEvent @event)
         {
             Events.Add(@event);
-            this.CurrentState = _calculationService.Calculate(Events, DateTime.Now);
+            this.CurrentState = CalculationService.Calculate(Events, DateTime.Now);
         }
 
         private bool ShouldAddWeeklyEvent(DateTime currentTime)
@@ -187,7 +204,7 @@ namespace ProcastinationKiller.Models
 
         internal void Calculate()
         {
-            CurrentState = _calculationService.Calculate(Events, DateTime.Now);
+            CurrentState = CalculationService.Calculate(Events, DateTime.Now);
         }
     }
 }

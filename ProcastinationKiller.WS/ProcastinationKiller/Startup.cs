@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -58,6 +59,16 @@ namespace ProcastinationKiller
                 };
             });
 
+            var hashingPassword = new SecureString();
+
+            var pass = Configuration.GetValue<string>("Encoding:Activation");
+
+            foreach (var c in pass)
+            {
+                hashingPassword.AppendChar(c);
+            }
+
+            services.AddSingleton<IEncryptor>(sp => new Encryptor(hashingPassword));
             services.AddScoped<IMailProvider, MailProvider>();
             services.AddScoped<ITemplateProvider, FileTemplateProvider>();
             services.AddScoped<IUserService, UserService>();
@@ -68,6 +79,7 @@ namespace ProcastinationKiller
                 opt.Address = Configuration.GetValue<string>("Mail:Address");
                 opt.Password = Configuration.GetValue<string>("Mail:Password");
             });
+
             //services.AddDbContext<UsersContext>();
             services.AddEntityFrameworkNpgsql()
                 .AddDbContext<UsersContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("SystemDb")));

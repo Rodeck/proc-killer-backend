@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
 using ProcastinationKiller.Models.Responses;
@@ -13,6 +15,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ProcastinationKiller.Services
 {
@@ -42,6 +45,12 @@ namespace ProcastinationKiller.Services
         /// <returns></returns>
         Task<IValidationState> RegisterUser(UserRegistrationModel registrationModel);
 
+        /// <summary>
+        /// Aktywuj konto nowego użytkownika
+        /// </summary>
+        /// <param name="secret"></param>
+        /// <returns></returns>
+        Task<IValidationState> ActivateAccount(string secret);
 
         void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate);
 
@@ -79,17 +88,20 @@ namespace ProcastinationKiller.Services
         private readonly UsersContext _context;
         private readonly IMailingService _mailingService;
         private readonly IMailProvider _mailProvider;
+        private readonly IEncryptor _encryptor;
 
         public UserService(
             IOptions<AppSettings> appSettings,
             UsersContext context, 
             IMailingService mailingService,
-            IMailProvider mailProvider)
+            IMailProvider mailProvider,
+            IEncryptor encryptor)
         {
             _appSettings = appSettings.Value;
             _context = context;
             _mailingService = mailingService;
             _mailProvider = mailProvider;
+            _encryptor = encryptor;
         }
 
         public User Authenticate(string username, string password, DateTime dateTime)
@@ -163,11 +175,21 @@ namespace ProcastinationKiller.Services
                 Email = registrationModel.Email
             };
 
-            var registrationCode = "aaabbbccc";
+            var code = Guid.NewGuid().ToString();
+            var registrationCode = HttpUtility.UrlEncode(_encryptor.Encrypt(JsonConvert.SerializeObject(new ActivationModel
+            {
+                Username = registrationModel.Username,
+                GenerationDate = DateTime.Now,
+                Password = registrationModel.Password,
+                Code = code
+            }, new JsonSerializerSettings()
+            {
+                DateFormatString = "yyyy-MM-dd HH:mm:ss"
+            })));
 
-            newUser.AddCode(registrationCode);
+            newUser.AddCode(code);
 
-            var mail =  await _mailProvider.GetRegistrationMailBody("http://localhost:8080/#/");
+            var mail =  await _mailProvider.GetRegistrationMailBody($"http://localhost:8080/activate/{registrationCode}");
 
             await _mailingService.SendEmail(mail, newUser.Email);
 
@@ -219,7 +241,8 @@ namespace ProcastinationKiller.Services
                 Description = description,
                 Name = name,
                 Regdate = regdate,
-                TargetDate = targetDate
+                TargetDate = targetDate,
+                Tags = new List<string>()
             });
 
             var count = _context.SaveChanges();
@@ -345,6 +368,39 @@ namespace ProcastinationKiller.Services
                 throw new Exception($"Could not find todo with id {todoId}");
 
             todo.Tags = todo.Tags.Concat(new string[] { tag });
+        }
+
+        /// <summary>
+        /// Metoda służy do aktywowania konta użytkownika
+        /// </summary>
+        /// <param name="secret"></param>
+        /// <returns></returns>
+        public async Task<IValidationState> ActivateAccount(string secret)
+        {
+            try
+            {
+                var userJson = HttpUtility.UrlDecode(_encryptor.Decrypt(secret));
+
+                if (userJson == null)
+                    throw new Exception("Could not decrypt secret.");
+
+                var format = "yyyy-MM-dd HH:mm:ss"; // your datetime format
+                var dateTimeConverter = new IsoDateTimeConverter { DateTimeFormat = format };
+
+                var activationModel = JsonConvert.DeserializeObject<ActivationModel>(userJson, dateTimeConverter);
+
+                var user = _context.GetUserForLogin(activationModel.Username, activationModel.Password);
+
+                user.Activate(activationModel.Code);
+
+                return new ValidationState();
+
+            }
+            catch(Exception ex)
+            {
+                return new ValidationState()
+                    .AddValidationError($"Error during acccount activation. {ex.Message}", "");
+            }
         }
 
         private static Dictionary<Type, string> nameMappings = new Dictionary<Type, string>()

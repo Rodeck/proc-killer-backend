@@ -35,4 +35,13 @@ namespace ProcastinationKiller.Models
             return Success;
         }
     }
+
+    public static class ValidationExtensions
+    {
+        public static ValidationState AddValidationError(this ValidationState validationState, string msg, string @object)
+        {
+            validationState.AddError(msg, @object);
+            return validationState;
+        }
+    }
 }

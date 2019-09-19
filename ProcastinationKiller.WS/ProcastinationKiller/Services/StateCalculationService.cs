@@ -12,16 +12,19 @@ namespace ProcastinationKiller.Services
     public class StateCalculationService : IStateCalculationService
     {
         private Dictionary<Type, Func<BaseEvent, UserState, UserState>> _handlers = new Dictionary<Type, Func<BaseEvent, UserState, UserState>>();
+        private IDefinitionsContext _definitionsContext;
 
-        public StateCalculationService()
+        public StateCalculationService(IDefinitionsContext definitionsContext)
         {
             RegisterHandlers();
+            _definitionsContext = definitionsContext;
         }
 
         private void RegisterHandlers()
         {
             AddHandler<TodoCompletedEvent, TodoCompletedCalculationHandler>();
             AddHandler<DailyLoginEvent, DailyLoginCalculationHandler>();
+            AddHandler<WeeklyLoginEvent, WeeklyLoginCalculationHandler>();
         }
 
         private void AddHandler<TEvent, THandler>()
@@ -47,10 +50,52 @@ namespace ProcastinationKiller.Services
                 lastOperation = @event;
 
                 if (@event.Date <= currentTime)
+                {
+                    AssignLevel(@event.State, @event);
                     currentState = @event.State;
+                }
             }
 
             return currentState;
+        }
+
+        private UserState AssignLevel(UserState userState, BaseEvent baseEvent)
+        {
+            var level = userState.Level;
+
+            if (level != null)
+            {
+                // Level up
+                if (level.RequiredExp <= baseEvent.Points)
+                {
+                    var currentLevelDefinition = _definitionsContext.GetLevel(level.Number + 1);
+
+                    userState.Level = new Level()
+                    {
+                        Definition = currentLevelDefinition,
+                        Number = level.Number + 1,
+                        CurrentExp = baseEvent.Points.GetValueOrDefault() - level.RequiredExp,
+                        RequiredExp = level.RequiredExp = currentLevelDefinition.RequiredExp
+                    };
+                }
+                else
+                {
+                    level.CurrentExp += baseEvent.Points.GetValueOrDefault();
+                }
+            }
+            else
+            {
+                var currentLevelDefinition = _definitionsContext.GetLevel(1);
+                userState.Level = new Level()
+                {
+                    Number = 1,
+                    CurrentExp = baseEvent.Points.GetValueOrDefault(),
+                    RequiredExp = currentLevelDefinition.RequiredExp,
+                    Definition = currentLevelDefinition
+                };
+            }
+
+            return userState;
         }
     }
 }

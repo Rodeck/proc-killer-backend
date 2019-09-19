@@ -13,7 +13,7 @@ namespace ProcastinationKiller.Services.EventHandlers
         public UserState Calculate(DailyLoginEvent @event, UserState currentState)
         {
             int points = SystemSettings.DailyLoginReward;
-            currentState.Points += points;
+            
             currentState.DailyLogins++;
 
             // Jeśli poprzedniego dnia było logowanie to mamy login streak
@@ -31,15 +31,30 @@ namespace ProcastinationKiller.Services.EventHandlers
                 points += Math.Min(
                     (int)((currentState.CurrentLoginStreak * SystemSettings.DailyLoginStreakMultiplier) * SystemSettings.DailyLoginReward),
                     SystemSettings.DailyLoginStreakCap);
-
-                currentState.Points += points;
             }
 
+            currentState.Points += points;
             currentState.LastLoginDate = @event.Date;
 
             @event.Points = points;
 
             @event.State = currentState;
+            return currentState;
+        }
+    }
+
+    public class WeeklyLoginCalculationHandler : IEventCalculationHandler<WeeklyLoginEvent>
+    {
+        public UserState Calculate(WeeklyLoginEvent @event, UserState currentState)
+        {
+            int points = SystemSettings.DailyLoginReward;
+
+            currentState.WeeklyLogins++;
+            currentState.Points += points *2;
+
+            @event.Points = points;
+            @event.State = currentState;
+
             return currentState;
         }
     }

@@ -1,7 +1,9 @@
-﻿using ProcastinationKiller.Models;
+﻿using NSubstitute;
+using ProcastinationKiller.Models;
 using ProcastinationKiller.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -9,10 +11,59 @@ namespace TodosTests
 {
     public class StateCalculationServiceTests
     {
+        private IDefinitionsContext _defContext;
+
+        public StateCalculationServiceTests()
+        {
+            var leagues = new League[]
+            {
+                new League()
+                {
+                    Id = 1,
+                    Name = "x"
+                },
+                new League()
+                {
+                    Id = 2,
+                    Name = "y"
+                },
+                new League()
+                {
+                    Id = 3,
+                    Name = "z"
+                },
+                new League()
+                {
+                    Id = 4,
+                    Name = "a"
+                },
+            };
+
+            _defContext = Substitute.For<IDefinitionsContext>();
+
+            _defContext.GetLevel(1).Returns(new LevelDefinition()
+            {
+                Id = 1,
+                League = leagues.Single(x => x.Id == 1),
+                Number = 1,
+                RequiredExp = 100
+            });
+
+            _defContext.GetLevel(2).Returns(new LevelDefinition()
+            {
+                Id = 1,
+                League = leagues.Single(x => x.Id == 1),
+                Number = 1,
+                RequiredExp = 200
+            });
+
+            _defContext.GetLeague(Arg.Any<int>()).Returns(x => leagues.Single(y => y.Id == (int)x[0]));
+        }
+
         [Fact(DisplayName = "[CalcService] Dodanie operacji zakończenia todo przelicza poprawnie stan.")]
         public void Test_CompleteTodo()
         {
-            StateCalculationService calculationService = new StateCalculationService();
+            StateCalculationService calculationService = new StateCalculationService(_defContext);
 
             var @events = new List<BaseEvent>()
             {
@@ -47,7 +98,7 @@ namespace TodosTests
         [MemberData(nameof(LoginTestData))]
         public void Test_Login(IEnumerable<BaseEvent> events, UserState expectedState)
         {
-            StateCalculationService calculationService = new StateCalculationService();
+            StateCalculationService calculationService = new StateCalculationService(_defContext);
 
             var currentState = calculationService.Calculate(events, DateTime.Now);
 

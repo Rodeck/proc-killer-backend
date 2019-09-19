@@ -4,10 +4,23 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ProcastinationKiller.Migrations
 {
-    public partial class Initial : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "League",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_League", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "RegistartionCode",
                 columns: table => new
@@ -24,6 +37,49 @@ namespace ProcastinationKiller.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Levels",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Number = table.Column<int>(nullable: false),
+                    RequiredExp = table.Column<int>(nullable: false),
+                    LeagueId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Levels", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Levels_League_LeagueId",
+                        column: x => x.LeagueId,
+                        principalTable: "League",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Level",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Number = table.Column<int>(nullable: false),
+                    CurrentExp = table.Column<int>(nullable: false),
+                    RequiredExp = table.Column<int>(nullable: false),
+                    DefinitionId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Level", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Level_Levels_DefinitionId",
+                        column: x => x.DefinitionId,
+                        principalTable: "Levels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserState",
                 columns: table => new
                 {
@@ -35,11 +91,18 @@ namespace ProcastinationKiller.Migrations
                     LongestLoginStreak = table.Column<int>(nullable: false),
                     CurrentLoginStreak = table.Column<int>(nullable: false),
                     TotalTodosCompleted = table.Column<int>(nullable: false),
-                    LastLoginDate = table.Column<DateTime>(nullable: true)
+                    LastLoginDate = table.Column<DateTime>(nullable: true),
+                    LevelId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserState", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserState_Level_LevelId",
+                        column: x => x.LevelId,
+                        principalTable: "Level",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -86,6 +149,7 @@ namespace ProcastinationKiller.Migrations
                     Completed = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
+                    TagString = table.Column<string>(nullable: false),
                     UserId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -152,6 +216,16 @@ namespace ProcastinationKiller.Migrations
                 column: "CompletedItemId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Level_DefinitionId",
+                table: "Level",
+                column: "DefinitionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Levels_LeagueId",
+                table: "Levels",
+                column: "LeagueId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Todos_UserId",
                 table: "Todos",
                 column: "UserId");
@@ -165,6 +239,11 @@ namespace ProcastinationKiller.Migrations
                 name: "IX_Users_CurrentStateId",
                 table: "Users",
                 column: "CurrentStateId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserState_LevelId",
+                table: "UserState",
+                column: "LevelId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -183,6 +262,15 @@ namespace ProcastinationKiller.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserState");
+
+            migrationBuilder.DropTable(
+                name: "Level");
+
+            migrationBuilder.DropTable(
+                name: "Levels");
+
+            migrationBuilder.DropTable(
+                name: "League");
         }
     }
 }

@@ -48,6 +48,56 @@ namespace ProcastinationKiller.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("BaseEvent");
                 });
 
+            modelBuilder.Entity("ProcastinationKiller.Models.League", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("League");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.Level", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("CurrentExp");
+
+                    b.Property<int?>("DefinitionId");
+
+                    b.Property<int>("Number");
+
+                    b.Property<int>("RequiredExp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefinitionId");
+
+                    b.ToTable("Level");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.LevelDefinition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("LeagueId");
+
+                    b.Property<int>("Number");
+
+                    b.Property<int>("RequiredExp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeagueId");
+
+                    b.ToTable("Levels");
+                });
+
             modelBuilder.Entity("ProcastinationKiller.Models.RegistartionCode", b =>
                 {
                     b.Property<int>("Id")
@@ -134,6 +184,8 @@ namespace ProcastinationKiller.Migrations
 
                     b.Property<DateTime?>("LastLoginDate");
 
+                    b.Property<int?>("LevelId");
+
                     b.Property<int>("LongestLoginStreak");
 
                     b.Property<int>("Points");
@@ -143,6 +195,8 @@ namespace ProcastinationKiller.Migrations
                     b.Property<int>("WeeklyLogins");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LevelId");
 
                     b.ToTable("UserState");
                 });
@@ -191,6 +245,20 @@ namespace ProcastinationKiller.Migrations
                         .HasForeignKey("UserId");
                 });
 
+            modelBuilder.Entity("ProcastinationKiller.Models.Level", b =>
+                {
+                    b.HasOne("ProcastinationKiller.Models.LevelDefinition", "Definition")
+                        .WithMany()
+                        .HasForeignKey("DefinitionId");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.LevelDefinition", b =>
+                {
+                    b.HasOne("ProcastinationKiller.Models.League", "League")
+                        .WithMany()
+                        .HasForeignKey("LeagueId");
+                });
+
             modelBuilder.Entity("ProcastinationKiller.Models.TodoItem", b =>
                 {
                     b.HasOne("ProcastinationKiller.Models.User")
@@ -207,6 +275,13 @@ namespace ProcastinationKiller.Migrations
                     b.HasOne("ProcastinationKiller.Models.UserState", "CurrentState")
                         .WithMany()
                         .HasForeignKey("CurrentStateId");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.UserState", b =>
+                {
+                    b.HasOne("ProcastinationKiller.Models.Level", "Level")
+                        .WithMany()
+                        .HasForeignKey("LevelId");
                 });
 
             modelBuilder.Entity("ProcastinationKiller.Models.TodoCompletedEvent", b =>

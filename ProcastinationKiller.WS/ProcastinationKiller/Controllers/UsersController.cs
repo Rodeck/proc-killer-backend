@@ -81,6 +81,19 @@ namespace ProcastinationKiller.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        [Route("activateAccount")]
+        public async Task<IActionResult> ActivateAccount([FromBody] ActivateAccountModel secret)
+        {
+            var validation = await _userService.ActivateAccount(secret.Secret);
+
+            if (!validation.Success())
+                return BadRequest(validation);
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
         [Route("recalculateEvents/{userId:int}")]
         public IServiceResult RecalculateState(int userId)
         {

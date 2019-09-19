@@ -56,29 +56,32 @@ namespace ProcastinationKiller.Services
             var user = GetUsersTodos(userId);
             List<CumulativeResult> result = new List<CumulativeResult>();
 
-            DateTime minDate = user.UserTodos.Min(x => x.TargetDate);
-            DateTime maxDate = user.UserTodos.Max(x => x.TargetDate);
-
-            foreach (DateTime day in EachDay(minDate, maxDate))
+            if (user.UserTodos.Any())
             {
-                int thisDayTodos = user.UserTodos.Count(x => x.TargetDate.Date == day.Date);
-                int completed = user.UserTodos.Count(x => x.TargetDate.Date == day.Date && x.Completed);
-                int notCompleted = thisDayTodos - completed;
-                CumulativeResult todosCumulativeModel = new CumulativeResult()
-                {
-                    Date = day,
-                    Completed = result.Any()
-                        ? result.Last().Completed + completed
-                        : completed,
-                    All = result.Any()
-                        ? result.Last().All + thisDayTodos
-                        : thisDayTodos,
-                    NotCompleted = result.Any()
-                        ? result.Last().NotCompleted + notCompleted
-                        : notCompleted,
-                };
+                DateTime minDate = user.UserTodos.Min(x => x.TargetDate);
+                DateTime maxDate = user.UserTodos.Max(x => x.TargetDate);
 
-                result.Add(todosCumulativeModel);
+                foreach (DateTime day in EachDay(minDate, maxDate))
+                {
+                    int thisDayTodos = user.UserTodos.Count(x => x.TargetDate.Date == day.Date);
+                    int completed = user.UserTodos.Count(x => x.TargetDate.Date == day.Date && x.Completed);
+                    int notCompleted = thisDayTodos - completed;
+                    CumulativeResult todosCumulativeModel = new CumulativeResult()
+                    {
+                        Date = day,
+                        Completed = result.Any()
+                            ? result.Last().Completed + completed
+                            : completed,
+                        All = result.Any()
+                            ? result.Last().All + thisDayTodos
+                            : thisDayTodos,
+                        NotCompleted = result.Any()
+                            ? result.Last().NotCompleted + notCompleted
+                            : notCompleted,
+                    };
+
+                    result.Add(todosCumulativeModel);
+                }
             }
 
             return result.ToArray();
