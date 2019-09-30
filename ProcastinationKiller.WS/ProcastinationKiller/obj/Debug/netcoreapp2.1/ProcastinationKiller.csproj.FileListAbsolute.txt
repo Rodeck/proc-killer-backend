@@ -27,3 +27,4 @@ C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKi
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\ProcastinationKiller\obj\Debug\netcoreapp2.1\ProcastinationKiller.RazorTargetAssemblyInfo.cache
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\ProcastinationKiller\bin\Debug\netcoreapp2.1\Assets\registration-mail.html
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\ProcastinationKiller\obj\Debug\netcoreapp2.1\ProcastinationKiller.csprojAssemblyReference.cache
+C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\ProcastinationKiller\bin\Debug\netcoreapp2.1\app.yaml

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NSubstitute;
 using NSubstitute.Extensions;
+using ProcastinationKiller.Exceptions;
 using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
 using ProcastinationKiller.Services;
@@ -116,6 +117,35 @@ namespace TodosTests
             Assert.Equal(user.UserTodos.Single(), @event.CompletedItem);
             Assert.Equal(DateTime.Now.Date, @event.Date.Date);
             Assert.False(@event.Hidden);
+        }
+
+        [Fact(DisplayName = "[UserService] Nie mo¿na wykonaæ todo na przysz³oœæ.")]
+        public void FinishTodoFromFuture_Error()
+        {
+            var user = new User()
+            {
+                Events = new List<BaseEvent>(),
+                UserTodos = new List<TodoItem>()
+                {
+                    new TodoItem()
+                    {
+                        Completed = false,
+                        Description = "desc",
+                        Id = 1,
+                        TargetDate = DateTime.Now.AddDays(1),
+                        FinishTime = null,
+                    }
+                },
+                CalculationService = new StateCalculationService(_ctx)
+            };
+
+            _ctx.Configure().GetUserById(1).Returns(user);
+
+            var ex = Record.Exception(() => _userService.MarkAsCompleted(1, DateTime.Now, 1));
+
+            Assert.NotNull(ex);
+            Assert.IsType<NotAllowedOperation>(ex);
+            Assert.Equal("Time traveler, You cannot complete todo from the future!", ex.Message);
         }
 
         [Fact(DisplayName = "[UserService] Logowanie pierwszy raz danego dnia dodaje event.")]

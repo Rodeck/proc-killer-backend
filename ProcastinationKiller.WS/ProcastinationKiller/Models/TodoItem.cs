@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProcastinationKiller.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -80,10 +81,12 @@ namespace ProcastinationKiller.Models
         public virtual void Finish(DateTime time)
         {
             if (Completed)
-                throw new Exception("Todo already completed!");
+                throw new NotAllowedOperation("Todo already completed!");
+
+            if (time.Date != TargetDate.Date)
+                throw new NotAllowedOperation("Time traveler, You cannot complete todo from the future!");
 
             Completed = true;
-
             FinishTime = time;
         }
 

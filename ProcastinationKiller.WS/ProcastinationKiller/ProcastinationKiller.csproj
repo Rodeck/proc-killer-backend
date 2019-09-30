@@ -22,6 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="app.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\registration-mail.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
