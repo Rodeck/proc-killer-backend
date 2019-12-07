@@ -19,6 +19,10 @@ namespace ProcastinationKiller
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddAWSProvider();
+                })
                 .UseStartup<Startup>();
     }
 }

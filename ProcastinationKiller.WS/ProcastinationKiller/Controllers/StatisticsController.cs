@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcastinationKiller.Controllers.Abstract;
+using ProcastinationKiller.Models;
 using ProcastinationKiller.Models.Responses;
 using ProcastinationKiller.Models.Responses.Abstract;
 using ProcastinationKiller.Services.Abstract;
@@ -52,6 +53,12 @@ namespace ProcastinationKiller.Controllers
             {
                 return Error<CumulativeResult[]>(ex);
             }
+        }
+
+        [HttpGet]
+        public Task<UserRanking[]> GetRanking1()
+        {
+            return _statisticsService.GetRankingAsync();
         }
     }
 }

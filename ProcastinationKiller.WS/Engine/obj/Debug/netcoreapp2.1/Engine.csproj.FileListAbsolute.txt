@@ -22,7 +22,6 @@ C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKi
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\ProcastinationKiller.dll
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\ProcastinationKiller.pdb
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.csprojAssemblyReference.cache
-C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.csproj.CoreCompileInputs.cache
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.AssemblyInfoInputs.cache
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.AssemblyInfo.cs
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.csproj.CopyComplete
@@ -30,3 +29,6 @@ C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKi
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\obj\Debug\netcoreapp2.1\Engine.pdb
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\Assets\registration-mail.html
 C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\app.yaml
+C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\appsettings.Development.json
+C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\aws-beanstalk-tools-defaults.json
+C:\Users\Gabriel Pająk\Documents\Projects\ProcastinationKiller\ProcastinationKiller.WS\Engine\bin\Debug\netcoreapp2.1\Properties\launchSettings.json

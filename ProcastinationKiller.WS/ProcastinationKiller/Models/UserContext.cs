@@ -21,15 +21,36 @@ namespace ProcastinationKiller.Models
 
         public virtual DbSet<User> Users { get; set; }
 
+        public virtual DbSet<BadgeDefinition> BadgeDefinitions { get; set; }
+
         public virtual DbSet<TodoItem> Todos { get; set; }
 
         public virtual DbSet<LevelDefinition> Levels { get; set; }
+
+        public virtual DbSet<Badge> Badges { get; set; }
 
         public virtual User GetUserById(int id)
         { 
             var user = Users.Include(u => u.UserTodos).Include(u => u.Events).Single(x => x.Id == id);
             user.CalculationService = new Services.StateCalculationService(this);
             return user;
+        }
+
+        public virtual User GetUserById(string id)
+        { 
+            var user = Users.Include(u => u.UserTodos).Include(u => u.Events).Single(x => x.UId == id);
+            user.CalculationService = new Services.StateCalculationService(this);
+            return user;
+        }
+
+        public virtual async Task<List<Badge>> GetUserBadges(string userId)
+        {
+            return await Badges
+                .Include(x => x.Conditions)
+                .Include(x => x.Definition)
+                    .ThenInclude(x => x.Conditions)
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
         }
 
         public virtual User GetUserForLogin(string username, string password)
@@ -43,10 +64,9 @@ namespace ProcastinationKiller.Models
                             .ThenInclude(x => x.League)
                 .SingleOrDefault(x => x.Username == username && x.Password == password);
             if (user != null)
-            user.CalculationService = new Services.StateCalculationService(this);
+                user.CalculationService = new Services.StateCalculationService(this);
            return user;
         }
-
 
         public virtual LevelDefinition GetLevel(int number)
         {
@@ -61,6 +81,7 @@ namespace ProcastinationKiller.Models
             builder.Entity<TodoCompletedEvent>();
             builder.Entity<DailyLoginEvent>();
             builder.Entity<WeeklyLoginEvent>();
+            builder.Entity<Badge>().ToTable("Badge");
 
             base.OnModelCreating(builder);
         }

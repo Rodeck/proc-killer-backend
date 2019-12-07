@@ -10,8 +10,8 @@ using ProcastinationKiller.Models;
 namespace ProcastinationKiller.Migrations
 {
     [DbContext(typeof(UsersContext))]
-    [Migration("20190915082321_Init")]
-    partial class Init
+    [Migration("20191204193104_Change uid on badges")]
+    partial class Changeuidonbadges
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,38 @@ namespace ProcastinationKiller.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            modelBuilder.Entity("ProcastinationKiller.Models.Badge", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime?>("AcquiredDate");
+
+                    b.Property<int?>("DefinitionId");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefinitionId");
+
+                    b.ToTable("Badge");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.BadgeDefinition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("AssignableFormBeggining");
+
+                    b.Property<string>("Image");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BadgeDefinitions");
+                });
 
             modelBuilder.Entity("ProcastinationKiller.Models.BaseEvent", b =>
                 {
@@ -116,6 +148,28 @@ namespace ProcastinationKiller.Migrations
                     b.ToTable("RegistartionCode");
                 });
 
+            modelBuilder.Entity("ProcastinationKiller.Models.RewardCondition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Amount");
+
+                    b.Property<int?>("BadgeDefinitionId");
+
+                    b.Property<int?>("BadgeId");
+
+                    b.Property<int>("Condition");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BadgeDefinitionId");
+
+                    b.HasIndex("BadgeId");
+
+                    b.ToTable("RewardCondition");
+                });
+
             modelBuilder.Entity("ProcastinationKiller.Models.TodoItem", b =>
                 {
                     b.Property<int>("Id")
@@ -161,6 +215,8 @@ namespace ProcastinationKiller.Migrations
                     b.Property<DateTime>("Regdate");
 
                     b.Property<string>("Token");
+
+                    b.Property<string>("UId");
 
                     b.Property<int>("UserStatus");
 
@@ -236,6 +292,13 @@ namespace ProcastinationKiller.Migrations
                     b.HasDiscriminator().HasValue("WeeklyLoginEvent");
                 });
 
+            modelBuilder.Entity("ProcastinationKiller.Models.Badge", b =>
+                {
+                    b.HasOne("ProcastinationKiller.Models.BadgeDefinition", "Definition")
+                        .WithMany()
+                        .HasForeignKey("DefinitionId");
+                });
+
             modelBuilder.Entity("ProcastinationKiller.Models.BaseEvent", b =>
                 {
                     b.HasOne("ProcastinationKiller.Models.UserState", "State")
@@ -259,6 +322,17 @@ namespace ProcastinationKiller.Migrations
                     b.HasOne("ProcastinationKiller.Models.League", "League")
                         .WithMany()
                         .HasForeignKey("LeagueId");
+                });
+
+            modelBuilder.Entity("ProcastinationKiller.Models.RewardCondition", b =>
+                {
+                    b.HasOne("ProcastinationKiller.Models.BadgeDefinition")
+                        .WithMany("Conditions")
+                        .HasForeignKey("BadgeDefinitionId");
+
+                    b.HasOne("ProcastinationKiller.Models.Badge")
+                        .WithMany("Conditions")
+                        .HasForeignKey("BadgeId");
                 });
 
             modelBuilder.Entity("ProcastinationKiller.Models.TodoItem", b =>

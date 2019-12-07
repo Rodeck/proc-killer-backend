@@ -4,10 +4,24 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ProcastinationKiller.Migrations
 {
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "BadgeDefinitions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Image = table.Column<string>(nullable: true),
+                    AssignableFormBeggining = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BadgeDefinitions", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "League",
                 columns: table => new
@@ -37,6 +51,27 @@ namespace ProcastinationKiller.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Badge",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    DefinitionId = table.Column<int>(nullable: true),
+                    UserId = table.Column<int>(nullable: false),
+                    AcquiredDate = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Badge", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Badge_BadgeDefinitions_DefinitionId",
+                        column: x => x.DefinitionId,
+                        principalTable: "BadgeDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Levels",
                 columns: table => new
                 {
@@ -53,6 +88,34 @@ namespace ProcastinationKiller.Migrations
                         name: "FK_Levels_League_LeagueId",
                         column: x => x.LeagueId,
                         principalTable: "League",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RewardCondition",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Condition = table.Column<int>(nullable: false),
+                    Amount = table.Column<int>(nullable: false),
+                    BadgeDefinitionId = table.Column<int>(nullable: true),
+                    BadgeId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RewardCondition", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RewardCondition_BadgeDefinitions_BadgeDefinitionId",
+                        column: x => x.BadgeDefinitionId,
+                        principalTable: "BadgeDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_RewardCondition_Badge_BadgeId",
+                        column: x => x.BadgeId,
+                        principalTable: "Badge",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -201,6 +264,11 @@ namespace ProcastinationKiller.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Badge_DefinitionId",
+                table: "Badge",
+                column: "DefinitionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BaseEvent_StateId",
                 table: "BaseEvent",
                 column: "StateId");
@@ -224,6 +292,16 @@ namespace ProcastinationKiller.Migrations
                 name: "IX_Levels_LeagueId",
                 table: "Levels",
                 column: "LeagueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RewardCondition_BadgeDefinitionId",
+                table: "RewardCondition",
+                column: "BadgeDefinitionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RewardCondition_BadgeId",
+                table: "RewardCondition",
+                column: "BadgeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Todos_UserId",
@@ -252,10 +330,19 @@ namespace ProcastinationKiller.Migrations
                 name: "BaseEvent");
 
             migrationBuilder.DropTable(
+                name: "RewardCondition");
+
+            migrationBuilder.DropTable(
                 name: "Todos");
 
             migrationBuilder.DropTable(
+                name: "Badge");
+
+            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "BadgeDefinitions");
 
             migrationBuilder.DropTable(
                 name: "RegistartionCode");

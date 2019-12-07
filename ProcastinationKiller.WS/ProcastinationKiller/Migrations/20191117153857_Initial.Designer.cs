@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProcastinationKiller.Models;
@@ -9,9 +10,10 @@ using ProcastinationKiller.Models;
 namespace ProcastinationKiller.Migrations
 {
     [DbContext(typeof(UsersContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20191117153857_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,7 +30,7 @@ namespace ProcastinationKiller.Migrations
 
                     b.Property<int?>("DefinitionId");
 
-                    b.Property<string>("UserId");
+                    b.Property<int>("UserId");
 
                     b.HasKey("Id");
 
@@ -213,8 +215,6 @@ namespace ProcastinationKiller.Migrations
                     b.Property<DateTime>("Regdate");
 
                     b.Property<string>("Token");
-
-                    b.Property<string>("UId");
 
                     b.Property<int>("UserStatus");
 

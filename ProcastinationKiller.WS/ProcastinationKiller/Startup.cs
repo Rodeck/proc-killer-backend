@@ -19,6 +19,8 @@ using ProcastinationKiller.Helpers;
 using ProcastinationKiller.Models;
 using ProcastinationKiller.Services;
 using ProcastinationKiller.Services.Abstract;
+using AWS.Logger.Core;
+using Microsoft.OpenApi.Models;
 
 namespace ProcastinationKiller
 {
@@ -41,23 +43,28 @@ namespace ProcastinationKiller
             // configure jwt authentication
             var appSettings = appSettingsSection.Get<AppSettings>();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(x =>
-            {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
+                    options.Authority = "https://securetoken.google.com/proc-killer";
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = "https://securetoken.google.com/proc-killer",
+                        ValidateAudience = true,
+                        ValidAudience = "proc-killer",
+                        ValidateLifetime = true
+                    };
+                });
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.IncludeXmlComments("ProcastinationKiller.xml");
             });
+
 
             var hashingPassword = new SecureString();
 
@@ -73,6 +80,7 @@ namespace ProcastinationKiller
             services.AddScoped<ITemplateProvider, FileTemplateProvider>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IStatisticsService, StatisticsService>();
+            services.AddScoped<IRewardService, RewardService>();
             services.AddSingleton<IMailingService, MailingService>();
             services.Configure<MailingOptions>(opt =>
             {
@@ -86,12 +94,15 @@ namespace ProcastinationKiller
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            /*
             services.AddCors(o => o.AddPolicy("any", builder =>
             {
                 builder.AllowAnyOrigin()
                        .AllowAnyMethod()
+                       .AllowCredentials()
                        .AllowAnyHeader();
             }));
+            */
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -100,14 +111,23 @@ namespace ProcastinationKiller
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                 app.UseSwagger();
+
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                });
             }
             else
             {
                 app.UseHsts();
             }
 
+
+
             // global cors policy
-            app.UseCors("any");
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
             app.UseAuthentication();
 

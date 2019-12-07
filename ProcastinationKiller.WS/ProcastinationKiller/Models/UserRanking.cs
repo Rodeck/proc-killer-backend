@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 
 namespace ProcastinationKiller.Models
 {
-    public class UserRegistrationModel
+    public class UserRanking
     {
-        public string Username { get; set; }
+        public string Name { get; set; }
 
-        public string Email { get; set; }
+        public int Points { get; set; }
+
+        public int Place { get; set; }
     }
 }

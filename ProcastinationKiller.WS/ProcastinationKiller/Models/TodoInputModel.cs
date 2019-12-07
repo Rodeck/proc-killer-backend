@@ -18,11 +18,6 @@ namespace ProcastinationKiller.Models
         public string Description { get; set; }
 
         /// <summary>
-        /// Id użytkownika
-        /// </summary>
-        public int UserId { get; set; }
-
-        /// <summary>
         /// Data na jaka jest todo
         /// </summary>
         public DateTime TargetDate { get; set; }
@@ -35,6 +30,6 @@ namespace ProcastinationKiller.Models
         /// <summary>
         /// Id użytkownika
         /// </summary>
-        public int UserId { get; set; }
+        public string UserId { get; set; }
     }
 }

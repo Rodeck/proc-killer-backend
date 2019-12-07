@@ -3,11 +3,16 @@ using ProcastinationKiller.Models;
 using ProcastinationKiller.Models.Responses;
 using ProcastinationKiller.Models.Responses.Abstract;
 using System;
+using System.Linq;
 
 namespace ProcastinationKiller.Controllers.Abstract
 {
     public abstract class BaseController: ControllerBase
     {
+        protected string GetUserId() {
+            return HttpContext.User.Identities.First().Claims.Single(x => x.Type == "user_id").Value;
+        }
+
         public virtual IServiceResult<TResult> Ok<TResult>(TResult result)
         {
             return new ServiceResult<TResult>()

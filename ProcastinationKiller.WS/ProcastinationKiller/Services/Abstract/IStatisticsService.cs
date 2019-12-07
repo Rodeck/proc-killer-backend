@@ -1,4 +1,5 @@
-﻿using ProcastinationKiller.Models.Responses;
+﻿using ProcastinationKiller.Models;
+using ProcastinationKiller.Models.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,9 @@ namespace ProcastinationKiller.Services.Abstract
         /// <returns></returns>
         PointsPerDayModel[] CalculatePointsPerDay(int userId);
         CumulativeResult[] GetCumulativeCompletedTodos(int userId);
+
+        Task<UserRanking[]> GetRankingAsync();
+
+        UserRanking[] GetRanking();
     }
 }

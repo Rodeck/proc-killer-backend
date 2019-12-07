@@ -25,54 +25,47 @@ namespace ProcastinationKiller.Services
     public interface IUserService
     {
         /// <summary>
-        /// Autnetyfikuj
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        User Authenticate(string username, string password, DateTime currentTime);
-
-        /// <summary>
         /// Pobierz wszystkich użytkiowników
         /// </summary>
         /// <returns></returns>
         IEnumerable<object> GetAll();
 
         /// <summary>
+        /// Pobierz konkretny dzień
+        /// </summary>
+        /// <returns></returns>
+        Task<Day> GetDay(string uid, DateTime date);
+
+        /// <summary>
         /// Zarejestruj nowego użytkownika
         /// </summary>
         /// <param name="registrationModel"></param>
         /// <returns></returns>
-        Task<IValidationState> RegisterUser(UserRegistrationModel registrationModel);
+        Task<IValidationState> RegisterUser(string uid, UserRegistrationModel registrationModel);
 
-        /// <summary>
-        /// Aktywuj konto nowego użytkownika
-        /// </summary>
-        /// <param name="secret"></param>
-        /// <returns></returns>
-        Task<IValidationState> ActivateAccount(string secret);
+        void AddTodo(string description, bool isCompleted, string name, string userId, DateTime regdate, DateTime targetDate);
 
-        void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate);
+        Task MarkAsCompleted(int todoId, DateTime completitionDate, string userId);
 
-        void MarkAsCompleted(int todoId, DateTime completitionDate, int userId);
-
-        void Restore(int todoId, int userId);
+        void Restore(int todoId, string userId);
 
         /// <summary>
         /// Pobierz kalendarz danego użytkownika
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        ICollection<Day> GetCallendar(int userId);
+        ICollection<Day> GetCallendar(string userId);
 
         /// <summary>
         /// Usuń todo
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        IServiceResult DeleteTodo(int userId, int todoId, bool force = false);
-        IServiceResult<ICollection<EventModel>> GetEvents(int userId);
-        IServiceResult Recalculate(int userId);
+        IServiceResult DeleteTodo(string userId, int todoId, bool force = false);
+
+        ICollection<EventModel> GetEvents(string userId);
+
+        Task<IServiceResult> Recalculate(string userId);
 
         /// <summary>
         /// Add tag to todo
@@ -89,55 +82,25 @@ namespace ProcastinationKiller.Services
         private readonly IMailingService _mailingService;
         private readonly IMailProvider _mailProvider;
         private readonly IEncryptor _encryptor;
+        private readonly IRewardService _rewardService;
 
         public UserService(
             IOptions<AppSettings> appSettings,
             UsersContext context, 
             IMailingService mailingService,
             IMailProvider mailProvider,
-            IEncryptor encryptor)
+            IEncryptor encryptor,
+            IRewardService rewardService)
         {
             _appSettings = appSettings.Value;
             _context = context;
             _mailingService = mailingService;
             _mailProvider = mailProvider;
             _encryptor = encryptor;
+            _rewardService = rewardService;
         }
 
-        public User Authenticate(string username, string password, DateTime dateTime)
-        {
-            var user = _context.GetUserForLogin(username, password);
-
-            // return null if user not found
-            if (user == null)
-                return null;
-
-            // authentication successful so generate jwt token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            user.Token = tokenHandler.WriteToken(token);
-
-            // remove password before returning
-            
-
-            user.AddDailyLoginReward(dateTime);
-
-            _context.SaveChanges();
-            user.Password = null;
-            return user;
-        }
-
-        public async Task<IValidationState> RegisterUser(UserRegistrationModel registrationModel)
+        public async Task<IValidationState> RegisterUser(string uid, UserRegistrationModel registrationModel)
         {
             ValidationState validationState = new ValidationState();
 
@@ -153,12 +116,6 @@ namespace ProcastinationKiller.Services
                 return validationState;
             }
 
-            if (registrationModel.Password.Length < 6)
-            {
-                validationState.AddError("Invalid password.", "Password");
-                return validationState;
-            }
-
             var existingUser = _context.Users.SingleOrDefault(x => x.Username == registrationModel.Username);
 
             if (existingUser != null)
@@ -169,32 +126,16 @@ namespace ProcastinationKiller.Services
 
             var newUser = new User()
             {
+                UId = uid,
                 Username = registrationModel.Username,
                 Regdate = DateTime.Now,
-                Password = registrationModel.Password,
                 Email = registrationModel.Email
             };
 
-            var code = Guid.NewGuid().ToString();
-            var registrationCode = HttpUtility.UrlEncode(_encryptor.Encrypt(JsonConvert.SerializeObject(new ActivationModel
-            {
-                Username = registrationModel.Username,
-                GenerationDate = DateTime.Now,
-                Password = registrationModel.Password,
-                Code = code
-            }, new JsonSerializerSettings()
-            {
-                DateFormatString = "yyyy-MM-dd HH:mm:ss"
-            })));
-
-            newUser.AddCode(code);
-
-            var mail =  await _mailProvider.GetRegistrationMailBody($"http://localhost:8080/activate/{registrationCode}");
-
-            await _mailingService.SendEmail(mail, newUser.Email);
-
             _context.Users.Add(newUser);
+
             _context.SaveChanges();
+            await _rewardService.AssignBaseRewards(newUser.UId);
 
             return validationState;
         }
@@ -206,9 +147,9 @@ namespace ProcastinationKiller.Services
                 .Include(u => u.UserTodos);
         }
 
-        public ICollection<Day> GetCallendar(int userId)
+        public ICollection<Day> GetCallendar(string userId)
         {
-            return _context.Users.Include(u => u.UserTodos).Single(x => x.Id == userId).Callendar;
+            return _context.Users.Include(u => u.UserTodos).Single(x => x.UId == userId).Callendar;
         }
 
         public void AddTodo(TodoItem todoItem)
@@ -225,9 +166,9 @@ namespace ProcastinationKiller.Services
         /// <param name="userId"></param>
         /// <param name="regdate"></param>
         /// <param name="targetDate"></param>
-        public void AddTodo(string description, bool isCompleted, string name, int userId, DateTime regdate, DateTime targetDate)
+        public void AddTodo(string description, bool isCompleted, string name, string userId, DateTime regdate, DateTime targetDate)
         {
-            var user = _context.Users.Include(u => u.UserTodos).Where(x => x.Id == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
+            var user = _context.Users.Include(u => u.UserTodos).Where(x => x.UId == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
 
             if (user.UserTodos.Where(x => x.TargetDate == targetDate).Count() + 1 > SystemSettings.MaxDayTodos)
                 throw new Exception($"Cannot add more todos for date {targetDate}");
@@ -249,33 +190,41 @@ namespace ProcastinationKiller.Services
         }
 
 
-        public void MarkAsCompleted(int todoId, DateTime completitionDate, int userId)
+        public async Task MarkAsCompleted(int todoId, DateTime completitionDate, string userId)
         {
-            var user =_context.GetUserById(userId)?? throw new Exception($"No user with id: {userId}");
+            var user = _context.GetUserById(userId)?? throw new Exception($"No user with id: {userId}");
 
             var todo = user.UserTodos.SingleOrDefault(x => x.Id == todoId) ?? throw new Exception($"No todo with id {todoId} for user {user.Id} found");
 
             todo.Finish(completitionDate);
             user.AddTodoCompletedEvent(todo);
+            await _rewardService.Calculate(userId, user.CurrentState.DailyLogins, user.CurrentState.Points, user.CurrentState.TotalTodosCompleted);
 
             _context.SaveChanges();
         }
 
-        public void Restore(int todoId, int userId)
+        public void Restore(int todoId, string userId)
         {
-            var user = _context.Users.Include(u => u.UserTodos).Where(x => x.Id == userId).SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
+            var user = _context.Users
+                .Include(u => u.UserTodos)
+                .Include(u => u.Events)
+                .Where(x => x.UId == userId)
+                .SingleOrDefault() ?? throw new Exception($"No user with id: {userId}");
 
             var todo = user.UserTodos.SingleOrDefault(x => x.Id == todoId) ?? throw new Exception($"No todo with id {todoId} for user {user.Id} found");
+
+            var @event = user.Events.OfType<TodoCompletedEvent>().Single(x => x.CompletedItem == todo && !x.Hidden);
+            user.HideEvent(@event.Id);
 
             todo.Undo();
 
             _context.SaveChanges();
         }
 
-        public IServiceResult DeleteTodo(int userId, int todoId, bool force = false)
+        public IServiceResult DeleteTodo(string userId, int todoId, bool force = false)
         {
             ServiceResult serviceResult = new ServiceResult();
-            var user = _context.Users.Include(x => x.UserTodos).SingleOrDefault(x => x.Id == userId);
+            var user = _context.Users.Include(x => x.UserTodos).SingleOrDefault(x => x.UId == userId);
 
             if (user == null)
             {
@@ -304,29 +253,20 @@ namespace ProcastinationKiller.Services
             return serviceResult;
         }
 
-        public IServiceResult<ICollection<EventModel>> GetEvents(int userId)
+        public ICollection<EventModel> GetEvents(string userId)
         {
-            ServiceResult<ICollection<EventModel>> serviceResult = new ServiceResult<ICollection<EventModel>>();
             var user = _context.Users
                 .Include(x => x.Events)
                     .ThenInclude(e => e.State)
-                .SingleOrDefault(x => x.Id == userId);
+                .SingleOrDefault(x => x.UId == userId);
 
-            if (user == null)
-            {
-                serviceResult.ValidationState.AddError("User not found", "UserId");
-                return serviceResult;
-            }
-
-            serviceResult.Result = MapEvents(user.Events);
-
-            return serviceResult;
+            return MapEvents(user.Events);
         }
 
-        public IServiceResult Recalculate(int userId)
+        public async Task<IServiceResult> Recalculate(string userId)
         {
             ServiceResult serviceResult = new ServiceResult();
-            var user = _context.Users.Include(x => x.Events).SingleOrDefault(x => x.Id == userId);
+            var user = _context.Users.Include(x => x.Events).SingleOrDefault(x => x.UId == userId);
 
             if (user == null)
             {
@@ -335,6 +275,7 @@ namespace ProcastinationKiller.Services
             }
 
             user.Calculate();
+            await _rewardService.Calculate(userId, user.CurrentState.DailyLogins, user.CurrentState.Points, user.CurrentState.TotalTodosCompleted);
 
             _context.SaveChanges();
 
@@ -370,37 +311,9 @@ namespace ProcastinationKiller.Services
             todo.Tags = todo.Tags.Concat(new string[] { tag });
         }
 
-        /// <summary>
-        /// Metoda służy do aktywowania konta użytkownika
-        /// </summary>
-        /// <param name="secret"></param>
-        /// <returns></returns>
-        public async Task<IValidationState> ActivateAccount(string secret)
+        public Task<Day> GetDay(string uid, DateTime date)
         {
-            try
-            {
-                var userJson = HttpUtility.UrlDecode(_encryptor.Decrypt(secret));
-
-                if (userJson == null)
-                    throw new Exception("Could not decrypt secret.");
-
-                var format = "yyyy-MM-dd HH:mm:ss"; // your datetime format
-                var dateTimeConverter = new IsoDateTimeConverter { DateTimeFormat = format };
-
-                var activationModel = JsonConvert.DeserializeObject<ActivationModel>(userJson, dateTimeConverter);
-
-                var user = _context.GetUserForLogin(activationModel.Username, activationModel.Password);
-
-                user.Activate(activationModel.Code);
-
-                return new ValidationState();
-
-            }
-            catch(Exception ex)
-            {
-                return new ValidationState()
-                    .AddValidationError($"Error during acccount activation. {ex.Message}", "");
-            }
+            return Task.FromResult(_context.Users.Include(u => u.UserTodos).Single(x => x.UId == uid).Callendar.Single(x => x.Date == date));
         }
 
         private static Dictionary<Type, string> nameMappings = new Dictionary<Type, string>()

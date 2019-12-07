@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ProcastinationKiller</name>
+    </assembly>
+    <members>
+        <member name="T:ProcastinationKiller.Models.BadgeDefinition">
+            <summary>
+            Definicja nagrody w postaci odznaki.
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.BadgeDefinition.Id">
+            <summary>
+            Id definicji
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.BadgeDefinition.Image">
+            <summary>
+            Obrazek nagrody
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.BadgeDefinition.Conditions">
+            <summary>
+            Warunki uzyskania nagrody.
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.BadgeDefinition.AssignableFormBeggining">
+            <summary>
+            Czy nagroda jest dodawana przy rejestracji.
+            </summary>
+        </member>
+        <member name="T:ProcastinationKiller.Models.RewardCondition">
+            <summary>
+            Warunek uzyskania nagrody.
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.RewardCondition.Id">
+            <summary>
+            Id warunku
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.RewardCondition.Condition">
+            <summary>
+            Typ warunku jaki musi być spełniony.
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.RewardCondition.Amount">
+            <summary>
+            Ilość jaka musi być spełniona.
+            </summary>
+        </member>
+        <member name="T:ProcastinationKiller.Models.Conditions">
+            <summary>
+            Enum reprezentuje wszystkie możliwe warunki.
+            </summary>
+        </member>
+        <member name="F:ProcastinationKiller.Models.Conditions.Logins">
+            <summary>
+            Ilość logowań.
+            </summary>
+        </member>
+        <member name="F:ProcastinationKiller.Models.Conditions.TodosCompleted">
+            <summary>
+            Ilość ukończonych todo.
+            </summary>
+        </member>
+        <member name="F:ProcastinationKiller.Models.Conditions.PointsEarned">
+            <summary>
+            Ilość zdobytych punktów.
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoInputModel.Name">
+            <summary>
+            Nazwa
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoInputModel.Description">
+            <summary>
+            Opis
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoInputModel.TargetDate">
+            <summary>
+            Data na jaka jest todo
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoCompleteInputModel.UserId">
+            <summary>
+            Id użytkownika
+            </summary>
+        </member>
+        <member name="T:ProcastinationKiller.Models.TodoItem">
+            <summary>
+            Klasa reprezentuje rzecz do zrobienia
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.Id">
+            <summary>
+            Unikalny id
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.Regdate">
+            <summary>
+            Data stworzenia
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.FinishTime">
+            <summary>
+            Data zakończenia
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.TargetDate">
+            <summary>
+            Todo planowany na dzień
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.Completed">
+            <summary>
+            Czy zakończony
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.Name">
+            <summary>
+            Nazwa
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.Description">
+            <summary>
+            Opis
+            </summary>
+        </member>
+        <member name="M:ProcastinationKiller.Models.TodoItem.Finish(System.DateTime)">
+            <summary>
+            Zakończ dane zadanie
+            </summary>
+        </member>
+        <member name="M:ProcastinationKiller.Models.TodoItem.Undo">
+            <summary>
+            Przywróć dane zadanie do wykonania
+            </summary>
+        </member>
+        <member name="M:ProcastinationKiller.Models.User.Activate(System.String)">
+            <summary>
+            Aktywuj konto użytkownika
+            </summary>
+            <param name="code"></param>
+        </member>
+        <member name="T:ProcastinationKiller.Services.Abstract.IEventCalculationHandler`1">
+            <summary>
+            Interfejs do handlera operacji
+            </summary>
+            <typeparam name="TEvent"></typeparam>
+        </member>
+        <member name="T:ProcastinationKiller.Services.Abstract.IStateCalculationService">
+            <summary>
+            Interefejs dla usługi przeliczającej operacje
+            </summary>
+        </member>
+        <member name="M:ProcastinationKiller.Services.Abstract.IStateCalculationService.Calculate(System.Collections.Generic.IEnumerable{ProcastinationKiller.Models.BaseEvent},System.DateTime)">
+            <summary>
+            Przelicz kolekcję operacji zwracając stan
+            </summary>
+            <param name="baseEvents"></param>
+            <param name="currentTime"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ProcastinationKiller.Services.Abstract.IStatisticsService">
+            <summary>
+            Interfejs dla usługi wyliczającej statystyki
+            </summary>
+        </member>
+        <member name="M:ProcastinationKiller.Services.Abstract.IStatisticsService.CalculatePointsPerDay(System.Int32)">
+            <summary>
+            Wyznacza ilość punktów zdobywanych każdego dnia
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ProcastinationKiller.Services.IUserService">
+            <summary>
+            Interfejs dla seriwsu obsługujcego logowanie, rejestracje, autentyfikacje
+            </summary>
+        </member>
+        <member name="M:ProcastinationKiller.Services.IUserService.GetAll">
+            <summary>
+            Pobierz wszystkich użytkiowników
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ProcastinationKiller.Services.IUserService.GetDay(System.String,System.DateTime)">
+            <summary>
+            Pobierz konkretny dzień
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ProcastinationKiller.Services.IUserService.RegisterUser(System.String,ProcastinationKiller.Models.UserRegistrationModel)">
+            <summary>
+            Zarejestruj nowego użytkownika
+            </summary>
+            <param name="registrationModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ProcastinationKiller.Services.IUserService.GetCallendar(System.String)">
+            <summary>
+            Pobierz kalendarz danego użytkownika
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ProcastinationKiller.Services.IUserService.DeleteTodo(System.String,System.Int32,System.Boolean)">
+            <summary>
+            Usuń todo
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ProcastinationKiller.Services.IUserService.AddTag(System.Int32,System.String)">
+            <summary>
+            Add tag to todo
+            </summary>
+            <param name="todoId"></param>
+            <param name="tag"></param>
+        </member>
+        <member name="M:ProcastinationKiller.Services.UserService.AddTodo(System.String,System.Boolean,System.String,System.String,System.DateTime,System.DateTime)">
+            <summary>
+            Metoda dodaje nowe todo dla użytkownika
+            </summary>
+            <param name="description"></param>
+            <param name="isCompleted"></param>
+            <param name="name"></param>
+            <param name="userId"></param>
+            <param name="regdate"></param>
+            <param name="targetDate"></param>
+        </member>
+    </members>
+</doc>

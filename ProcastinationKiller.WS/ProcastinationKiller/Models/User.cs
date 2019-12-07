@@ -11,8 +11,13 @@ namespace ProcastinationKiller.Models
     public class User
     {
         public int Id { get; set; }
+
+        public string UId { get; set; }
+
         public string Username { get; set; }
+
         public string Password { get; set; }
+        
         public string Token { get; set; }
 
         public string Email { get; set; }
@@ -177,6 +182,12 @@ namespace ProcastinationKiller.Models
         internal void AddEvents(BaseEvent @event)
         {
             Events.Add(@event);
+            this.CurrentState = CalculationService.Calculate(Events, DateTime.Now);
+        }
+
+        internal void HideEvent(int eventId)
+        {
+            Events.Single(x => x.Id == eventId).Hidden = true;
             this.CurrentState = CalculationService.Calculate(Events, DateTime.Now);
         }
 

@@ -107,5 +107,26 @@ namespace ProcastinationKiller.Services
             for (var day = from.Date; day.Date <= thru.Date; day = day.AddDays(1))
                 yield return day;
         }
+
+        public UserRanking[] GetRanking()
+        {
+            var task = GetRankingAsync();
+            task.Wait();
+            return task.Result;
+        }
+
+        public async Task<UserRanking[]> GetRankingAsync()
+        {
+            return _context.Users
+                    .Include(x => x.CurrentState)
+                .ToList()
+                .OrderByDescending(x => x.CurrentState?.Points)
+                .Select((x, idx) => new UserRanking()
+                {
+                    Points = x.CurrentState?.Points ?? 0,
+                    Name = x.Username,
+                    Place = idx + 1
+                }).ToArray();
+        }
     }
 }

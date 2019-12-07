@@ -11,6 +11,7 @@ using ProcastinationKiller.Services.Abstract;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using Xunit;
 
@@ -21,6 +22,7 @@ namespace TodosTests
 
         private readonly UsersContext _ctx;
         private readonly IEncryptor _encryptor;
+        private readonly IRewardService _rewards;
         private readonly IUserService _userService;
 
         public UserServiceTests()
@@ -82,7 +84,8 @@ namespace TodosTests
             var mailProvider = new MailProvider(templateProvider);
 
             _encryptor = Substitute.For<IEncryptor>();
-            _userService = new UserService(options, _ctx, Substitute.For<IMailingService>(), mailProvider, _encryptor);
+            _rewards = Substitute.For<IRewardService>();
+            _userService = new UserService(options, _ctx, Substitute.For<IMailingService>(), mailProvider, _encryptor, _rewards);
         }
 
         [Fact(DisplayName = "[UserService] Wykonanie todo dodaje poprawny event.")]
@@ -120,7 +123,7 @@ namespace TodosTests
         }
 
         [Fact(DisplayName = "[UserService] Nie mo¿na wykonaæ todo na przysz³oœæ.")]
-        public void FinishTodoFromFuture_Error()
+        public async Task FinishTodoFromFuture_Error()
         {
             var user = new User()
             {
@@ -141,7 +144,7 @@ namespace TodosTests
 
             _ctx.Configure().GetUserById(1).Returns(user);
 
-            var ex = Record.Exception(() => _userService.MarkAsCompleted(1, DateTime.Now, 1));
+            var ex = await Record.ExceptionAsync(() => _userService.MarkAsCompleted(1, DateTime.Now, 1));
 
             Assert.NotNull(ex);
             Assert.IsType<NotAllowedOperation>(ex);
