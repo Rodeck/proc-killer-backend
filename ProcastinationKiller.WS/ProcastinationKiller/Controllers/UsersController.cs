@@ -51,6 +51,34 @@ namespace ProcastinationKiller.Controllers
             return _userService.GetCallendar(GetUserId());
         }
 
+        [HttpGet]
+        [Route("getUsers")]
+        public IEnumerable<UserViewModel> GetAllUsers()
+        {
+            return _userService.GetAll(GetUserId());
+        }
+
+        [HttpGet]
+        [Route("getFriends")]
+        public IEnumerable<UserViewModel> GetFriends()
+        {
+            return _userService.GetFriends(GetUserId());
+        }
+
+        [HttpGet]
+        [Route("getState")]
+        public Task<UserState> GetState()
+        {
+            return _userService.GetUserState(GetUserId());
+        }
+
+        [HttpPost]
+        [Route("authenticate")]
+        public Task Authenticate()
+        {
+            return _userService.Authenticate(GetUserId());
+        }
+
         [HttpPost]
         [Route("getDay")]
         public Task<Day> GetDay([FromBody] LoadTodoModel loadTodo)

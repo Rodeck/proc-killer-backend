@@ -17,6 +17,8 @@ namespace ProcastinationKiller.Models
         /// </summary>
         public int Id { get; set; }
 
+        public string CreatedBy { get; set; }
+
         /// <summary>
         /// Data stworzenia
         /// </summary>
@@ -83,7 +85,7 @@ namespace ProcastinationKiller.Models
             if (Completed)
                 throw new NotAllowedOperation("Todo already completed!");
 
-            if (time.Date != TargetDate.Date)
+            if (TargetDate.Date > time.Date)
                 throw new NotAllowedOperation("Time traveler, You cannot complete todo from the future!");
 
             Completed = true;

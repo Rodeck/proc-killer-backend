@@ -53,7 +53,7 @@ namespace ProcastinationKiller.Models
                 .ToListAsync();
         }
 
-        public virtual User GetUserForLogin(string username, string password)
+        public virtual User GetUserForLogin(string uid)
         {
            var user = Users
                 .Include(x => x.Events)
@@ -62,7 +62,7 @@ namespace ProcastinationKiller.Models
                     .ThenInclude(x => x.Level)
                         .ThenInclude(x => x.Definition)
                             .ThenInclude(x => x.League)
-                .SingleOrDefault(x => x.Username == username && x.Password == password);
+                .SingleOrDefault(x => x.UId == uid);
             if (user != null)
                 user.CalculationService = new Services.StateCalculationService(this);
            return user;

@@ -59,6 +59,8 @@ namespace ProcastinationKiller.Models
 
         private ICollection<Day> _days;
 
+        public virtual ICollection<Friend> Friends { get; set; }
+
         private void InitializeCallendar()
         {
 

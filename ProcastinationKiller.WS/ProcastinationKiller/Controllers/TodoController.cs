@@ -81,6 +81,20 @@ namespace ProcastinationKiller.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("loadUnfinished")]
+        public Task<IEnumerable<TodoItem>> Unfinished()
+        {
+            return _userService.GetUnfinished(GetUserId());
+        }
+
+        [HttpPost]
+        [Route("completeUnfinished")]
+        public Task CompleteUnfinished([FromQuery] int todoId)
+        {
+            return _userService.CompleteUnfinished(GetUserId(), todoId);
+        }
+
         [HttpDelete]
         [Route("deleteTodo/{userId:int}/{todoId:int}")]
         public IServiceResult DeleteTodo(string userId, int todoId)

@@ -28,7 +28,9 @@ namespace ProcastinationKiller.Services
         /// Pobierz wszystkich użytkiowników
         /// </summary>
         /// <returns></returns>
-        IEnumerable<object> GetAll();
+        IEnumerable<UserViewModel> GetAll(string uid);
+
+        IEnumerable<UserViewModel> GetFriends(string uid);
 
         /// <summary>
         /// Pobierz konkretny dzień
@@ -73,6 +75,14 @@ namespace ProcastinationKiller.Services
         /// <param name="todoId"></param>
         /// <param name="tag"></param>
         Task AddTag(int todoId, string tag);
+
+        Task<IEnumerable<TodoItem>> GetUnfinished(string userId);
+
+        Task CompleteUnfinished(string userId, int todoId);
+        
+        Task Authenticate(string userId);
+
+        Task<UserState> GetUserState(string userId);
     }
 
     public class UserService : IUserService
@@ -140,11 +150,27 @@ namespace ProcastinationKiller.Services
             return validationState;
         }
 
-        public IEnumerable<object> GetAll()
+        public IEnumerable<UserViewModel> GetAll(string uid)
         {
-            // return users without passwords
-            return _context.Users
-                .Include(u => u.UserTodos);
+            var user = _context
+                .Users
+                .Include(x => x.Friends)
+                .Single(x => x.UId == uid);
+            
+            var allUsers = _context
+                .Users
+                .Include(x => x.CurrentState)
+                    .ThenInclude(x => x.Level)
+                .Where(x => x.UId != uid);
+
+            return allUsers.Select(u => new UserViewModel()
+            {
+                IsFriend = user.Friends.Any(y => y.FriendId == u.UId),
+                Name = u.Username,
+                Uid = u.UId,
+                Level = u.CurrentState.Level.Number,
+                Points = u.CurrentState.Points
+            });
         }
 
         public ICollection<Day> GetCallendar(string userId)
@@ -314,6 +340,58 @@ namespace ProcastinationKiller.Services
         public Task<Day> GetDay(string uid, DateTime date)
         {
             return Task.FromResult(_context.Users.Include(u => u.UserTodos).Single(x => x.UId == uid).Callendar.Single(x => x.Date == date));
+        }
+
+        public async Task<IEnumerable<TodoItem>> GetUnfinished(string userId)
+        {
+            var user = await _context
+                .Users
+                .Include(x => x.UserTodos)
+                .SingleAsync(x => x.UId == userId);
+
+            return user.UserTodos.Where(x => !x.Completed && x.TargetDate.Date != DateTime.Now.Date).OrderByDescending(x => x.TargetDate);
+        }
+
+        public async Task CompleteUnfinished(string userId, int todoId)
+        {
+            var user = await _context
+                .Users
+                .Include(x => x.UserTodos)
+                .SingleAsync(x => x.UId == userId);
+
+            var todo = user.UserTodos.Single(x => x.Id == todoId);
+
+            todo.Finish(DateTime.Now);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public Task Authenticate(string userId)
+        {
+            var user = _context.GetUserForLogin(userId);
+            user.AddDailyLoginReward(DateTime.Now);
+            return _context.SaveChangesAsync();
+        }
+
+        public Task<UserState> GetUserState(string userId)
+        {
+           var user = _context.GetUserForLogin(userId);
+           return Task.FromResult(user.CurrentState);
+        }
+
+        public IEnumerable<UserViewModel> GetFriends(string uid)
+        {
+            var user = _context
+                .Users
+                .Include(x => x.Friends)
+                .Single(x => x.UId == uid);
+            
+            return user.Friends.Select(f => new UserViewModel()
+            {
+                Name = f.FriendName,
+                IsFriend = true,
+                Uid = f.FriendId,
+            });
         }
 
         private static Dictionary<Type, string> nameMappings = new Dictionary<Type, string>()

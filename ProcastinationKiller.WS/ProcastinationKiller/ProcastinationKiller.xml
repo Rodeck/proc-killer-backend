@@ -181,7 +181,7 @@
             Interfejs dla seriwsu obsługujcego logowanie, rejestracje, autentyfikacje
             </summary>
         </member>
-        <member name="M:ProcastinationKiller.Services.IUserService.GetAll">
+        <member name="M:ProcastinationKiller.Services.IUserService.GetAll(System.String)">
             <summary>
             Pobierz wszystkich użytkiowników
             </summary>
