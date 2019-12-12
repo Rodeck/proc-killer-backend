@@ -83,6 +83,16 @@ namespace ProcastinationKiller.Services
         Task Authenticate(string userId);
 
         Task<UserState> GetUserState(string userId);
+
+        Task<int> InviteFriend(string inviterId, string invitedId);
+
+        Task<int> AcceptInvitation(string invitedId, string inviterId, int invitationId);
+
+        Task<int> RejectInvitation(string invitedId, string inviterId, int invitationId);
+
+        Task<IEnumerable<InvitationViewModel>> GetInvitations(string userId);
+
+        Task<UserDetailsViewModel> GetUserDetails(string userId, string targetId);
     }
 
     public class UserService : IUserService
@@ -108,6 +118,58 @@ namespace ProcastinationKiller.Services
             _mailProvider = mailProvider;
             _encryptor = encryptor;
             _rewardService = rewardService;
+        }
+
+        public async Task<int> InviteFriend(string inviterId, string invitedId)
+        {
+            var inviter = _context.GetUserForLogin(inviterId);
+            var invited = _context.GetUserForLogin(invitedId);
+
+            var invitation = invited.AddFriendInvitation(inviterId, inviter.Username);
+
+            inviter.AddMyInvitation(invitedId);
+
+            await _context.SaveChangesAsync();
+
+            return invitation.Id;
+        }
+
+        public Task<int> AcceptInvitation(string invitedId, string inviterId, int invitationId)
+        {
+            var inviter = _context.GetUserForLogin(inviterId);
+            var invited = _context.GetUserForLogin(invitedId);
+
+            invited.AcceptInvitation(invitationId);
+            inviter.MyInvitationAccepted(invitedId, invited.Username);
+
+            return _context.SaveChangesAsync();
+        }
+
+        public Task<int> RejectInvitation(string invitedId, string inviterId, int invitationId)
+        {
+            var inviter = _context.GetUserForLogin(inviterId);
+            var invited = _context.GetUserForLogin(invitedId);
+
+            invited.RejectInvitation(invitationId);
+            inviter.MyInvitationReject(invitedId);
+
+            return _context.SaveChangesAsync();
+        }
+
+        public Task<IEnumerable<InvitationViewModel>> GetInvitations(string userId)
+        {
+            var user = _context.GetUserForLogin(userId);
+            return Task.FromResult(user.FriendsInvitations
+                .Where(x => !x.Accepted && !x.Rejected)
+                .Select(x => new InvitationViewModel()
+                    {
+                        Icon = x.Icon,
+                        Id = x.Id,
+                        InvitationDate = x.InvitationDate,
+                        InviterId = x.InviterId,
+                        InviterName = x.InviterName
+                    })
+                );
         }
 
         public async Task<IValidationState> RegisterUser(string uid, UserRegistrationModel registrationModel)
@@ -152,13 +214,13 @@ namespace ProcastinationKiller.Services
 
         public IEnumerable<UserViewModel> GetAll(string uid)
         {
-            var user = _context
-                .Users
-                .Include(x => x.Friends)
-                .Single(x => x.UId == uid);
+            var user = _context.GetUserForLogin(uid);
             
             var allUsers = _context
                 .Users
+                .Where(x => !user.Friends.Any(y => y.FriendId == x.UId) &&
+                    !user.FriendsInvitations.Any(y => y.InviterId == x.UId) &&
+                    !user.MyInvitations.Any(y => y.InvitedId == x.UId))
                 .Include(x => x.CurrentState)
                     .ThenInclude(x => x.Level)
                 .Where(x => x.UId != uid);
@@ -384,6 +446,7 @@ namespace ProcastinationKiller.Services
             var user = _context
                 .Users
                 .Include(x => x.Friends)
+                .Include(x => x.CurrentState)
                 .Single(x => x.UId == uid);
             
             return user.Friends.Select(f => new UserViewModel()
@@ -391,6 +454,19 @@ namespace ProcastinationKiller.Services
                 Name = f.FriendName,
                 IsFriend = true,
                 Uid = f.FriendId,
+            });
+        }
+
+        public Task<UserDetailsViewModel> GetUserDetails(string userId, string targetId)
+        {
+            var target = _context.GetUserForLogin(targetId);
+
+            return Task.FromResult(new UserDetailsViewModel()
+            {
+                Name = target.Username,
+                Uid = targetId,
+                IsFriend = target.Friends.Any(x => x.FriendId == userId),
+                State = target.CurrentState,
             });
         }
 

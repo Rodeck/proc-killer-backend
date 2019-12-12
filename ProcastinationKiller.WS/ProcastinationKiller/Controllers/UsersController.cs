@@ -93,6 +93,41 @@ namespace ProcastinationKiller.Controllers
             return _userService.GetEvents(GetUserId());
         }
 
+        [HttpGet]
+        [Route("getInvitations")]
+        public Task<IEnumerable<InvitationViewModel>> GetInviations()
+        {
+            return _userService.GetInvitations(GetUserId());
+        }
+
+        [HttpGet]
+        [Route("getUserDetails/{userId}")]
+        public Task<UserDetailsViewModel> GetUserDetails(string userId)
+        {
+            return _userService.GetUserDetails(GetUserId(), userId);
+        }
+
+        [HttpPost]
+        [Route("addInvitation")]
+        public Task<int> AddInviation([FromBody] InviteDTO invited)
+        {
+            return _userService.InviteFriend(GetUserId(), invited.InvitedId);
+        }
+
+        [HttpPost]
+        [Route("acceptInvitation")]
+        public Task<int> AcceptInviation([FromBody] InvitationDTO invitationDTO)
+        {
+            return _userService.AcceptInvitation(GetUserId(), invitationDTO.InviterId, invitationDTO.InvitationId);
+        }
+
+        [HttpPost]
+        [Route("rejectInvitation")]
+        public Task<int> RejectInviation([FromBody] InvitationDTO invitationDTO)
+        {
+            return _userService.RejectInvitation(GetUserId(), invitationDTO.InviterId, invitationDTO.InvitationId);
+        }
+
         [HttpPost]
         [AllowAnonymous]
         [Route("recalculateEvents/{userId:int}")]

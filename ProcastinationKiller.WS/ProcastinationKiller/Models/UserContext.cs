@@ -62,6 +62,9 @@ namespace ProcastinationKiller.Models
                     .ThenInclude(x => x.Level)
                         .ThenInclude(x => x.Definition)
                             .ThenInclude(x => x.League)
+                .Include(x => x.FriendsInvitations)
+                .Include(x => x.MyInvitations)
+                .Include(x => x.Friends)
                 .SingleOrDefault(x => x.UId == uid);
             if (user != null)
                 user.CalculationService = new Services.StateCalculationService(this);

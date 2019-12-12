@@ -41,6 +41,9 @@ namespace ProcastinationKiller.Models
         {
             UserTodos = new HashSet<TodoItem>();
             _days = _days ?? new HashSet<Day>();
+            Friends = new HashSet<Friend>();
+            FriendsInvitations = new HashSet<FriendsInvitation>();
+            MyInvitations = new HashSet<MyInvitation>();
         }
 
         [NotMapped]
@@ -60,6 +63,10 @@ namespace ProcastinationKiller.Models
         private ICollection<Day> _days;
 
         public virtual ICollection<Friend> Friends { get; set; }
+
+        public virtual ICollection<FriendsInvitation> FriendsInvitations { get; set; }
+
+        public virtual ICollection<MyInvitation> MyInvitations { get; set; }
 
         private void InitializeCallendar()
         {
@@ -152,6 +159,74 @@ namespace ProcastinationKiller.Models
             {
                 throw new Exception("Provided activation code is invalid.");
             }
+        }
+
+        public void AcceptInvitation(int invitationId)
+        {
+            var invitation = FriendsInvitations.Single(x => x.Id == invitationId);
+
+            Friends.Add(new Friend()
+            {
+                FriendId = invitation.InviterId,
+                FriendName = invitation.InviterName,
+                IsAccepted = true,
+            });
+
+            invitation.Accepted = true;
+            invitation.AcceptedDate = DateTime.Now;
+        }
+
+        public void RejectInvitation(int invitationId)
+        {
+            var invitation = FriendsInvitations.Single(x => x.Id == invitationId);
+
+            invitation.Rejected = false;
+            invitation.RejectedDate = DateTime.Now;
+        }
+
+        public FriendsInvitation AddFriendInvitation(string inviterId, string inviterName)
+        {
+            var invitation = new FriendsInvitation()
+            {
+                Icon = "fa-user-plus",
+                InvitationDate = DateTime.Now,
+                InviterId = inviterId,
+                InviterName = inviterName,
+            };
+
+            FriendsInvitations.Add(invitation);
+
+            return invitation;
+        }
+
+        public void AddMyInvitation(string invitedId)
+        {
+            MyInvitations.Add(new MyInvitation()
+            {
+                InvitationDate = DateTime.Now,
+                InvitedId = invitedId,
+            });
+        }
+
+        public void MyInvitationAccepted(string invitedId, string friendName)
+        {
+            var myInvitation = MyInvitations.Single(x => x.InvitedId == invitedId);
+
+            myInvitation.IsAccepted = true;
+
+            Friends.Add(new Friend()
+            {
+                FriendId = invitedId,
+                FriendName = friendName,
+                IsAccepted = true,
+            });
+        }
+
+        public void MyInvitationReject(string invitedId)
+        {
+            var myInvitation = MyInvitations.Single(x => x.InvitedId == invitedId);
+
+            myInvitation.IsRejected = true;
         }
 
         internal void AddDailyLoginReward(DateTime currentTime)
