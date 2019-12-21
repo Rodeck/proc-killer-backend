@@ -49,6 +49,16 @@ namespace ProcastinationKiller.Models
         /// </summary>
         public string Description { get; set; }
 
+        /// <summary>
+        /// Czy todo zostało dodane przez znajomego.
+        /// </summary>
+        public bool FromFriend { get; set; }
+
+        /// <summary>
+        /// Id przyjaciela który dodał todo.
+        /// </summary>
+        public string FriendId { get; set; }
+
         [Required]
         public string TagString
         {

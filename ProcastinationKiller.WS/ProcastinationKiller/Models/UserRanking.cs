@@ -12,5 +12,7 @@ namespace ProcastinationKiller.Models
         public int Points { get; set; }
 
         public int Place { get; set; }
+
+        public string Uid { get; set; }
     }
 }

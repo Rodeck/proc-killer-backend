@@ -47,6 +47,8 @@ namespace ProcastinationKiller.Services
 
         void AddTodo(string description, bool isCompleted, string name, string userId, DateTime regdate, DateTime targetDate);
 
+        Task AddTodoFromFriend(string description, bool isCompleted, string name, string targetId, DateTime regdate, DateTime targetDate, string addingUserId);
+
         Task MarkAsCompleted(int todoId, DateTime completitionDate, string userId);
 
         void Restore(int todoId, string userId);
@@ -240,11 +242,6 @@ namespace ProcastinationKiller.Services
             return _context.Users.Include(u => u.UserTodos).Single(x => x.UId == userId).Callendar;
         }
 
-        public void AddTodo(TodoItem todoItem)
-        {
-            _context.SaveChanges();
-        }
-
         /// <summary>
         /// Metoda dodaje nowe todo dla użytkownika
         /// </summary>
@@ -277,6 +274,31 @@ namespace ProcastinationKiller.Services
             var count = _context.SaveChanges();
         }
 
+        
+        public Task AddTodoFromFriend(string description, bool isCompleted, string name, string targetId, DateTime regdate, DateTime targetDate, string addingUserId)
+        {
+            var user = _context.Users.Include(u => u.UserTodos).Where(x => x.UId == targetId).SingleOrDefault() ?? throw new Exception($"No user with id: {targetId}");
+
+            if (user.UserTodos.Where(x => x.TargetDate == targetDate).Count() + 1 > SystemSettings.MaxDayTodos)
+                throw new Exception($"Cannot add more todos for date {targetDate}");
+
+            if (targetDate.Date < DateTime.Now.Date)
+                throw new Exception("Cannot add todo for date from the past");
+
+            user.UserTodos.Add(new TodoItem()
+            {
+                Completed = false,
+                Description = description,
+                Name = name,
+                Regdate = regdate,
+                TargetDate = targetDate,
+                Tags = new List<string>(),
+                FromFriend = true,
+                FriendId = addingUserId,
+            });
+
+            return _context.SaveChangesAsync();
+        }
 
         public async Task MarkAsCompleted(int todoId, DateTime completitionDate, string userId)
         {

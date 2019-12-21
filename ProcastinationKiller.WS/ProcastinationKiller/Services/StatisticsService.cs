@@ -125,7 +125,8 @@ namespace ProcastinationKiller.Services
                 {
                     Points = x.CurrentState?.Points ?? 0,
                     Name = x.Username,
-                    Place = idx + 1
+                    Place = idx + 1,
+                    Uid = x.UId,
                 }).ToArray();
         }
     }

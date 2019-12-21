@@ -42,6 +42,14 @@ namespace ProcastinationKiller.Controllers
             }
         }
 
+
+        [HttpPost]
+        [Route("AddTodoForFriend")]
+        public Task AddItemFromFriend([FromBody] TodoFromFriendInputModel input)
+        {
+            return _userService.AddTodoFromFriend(input.Description, false, input.Name, input.TargetId, DateTime.Now, input.TargetDate, GetUserId());
+        }
+
         [HttpPost]
         [Route("AddTag")]
         public async Task<ActionResult> AddTag(int todoId, string tag)

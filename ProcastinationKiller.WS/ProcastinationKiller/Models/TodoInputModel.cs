@@ -23,6 +23,11 @@ namespace ProcastinationKiller.Models
         public DateTime TargetDate { get; set; }
     }
 
+    public class TodoFromFriendInputModel : TodoInputModel
+    {
+        public string TargetId { get; set; }
+    }
+
     public class TodoCompleteInputModel
     {
         public int Id { get; set; }

@@ -129,6 +129,16 @@
             Opis
             </summary>
         </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.FromFriend">
+            <summary>
+            Czy todo zostało dodane przez znajomego.
+            </summary>
+        </member>
+        <member name="P:ProcastinationKiller.Models.TodoItem.FriendId">
+            <summary>
+            Id przyjaciela który dodał todo.
+            </summary>
+        </member>
         <member name="M:ProcastinationKiller.Models.TodoItem.Finish(System.DateTime)">
             <summary>
             Zakończ dane zadanie
