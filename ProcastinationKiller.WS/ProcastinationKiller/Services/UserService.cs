@@ -433,7 +433,7 @@ namespace ProcastinationKiller.Services
                 .Include(x => x.UserTodos)
                 .SingleAsync(x => x.UId == userId);
 
-            return user.UserTodos.Where(x => !x.Completed && x.TargetDate.Date != DateTime.Now.Date).OrderByDescending(x => x.TargetDate);
+            return user.UserTodos.Where(x => !x.Completed && x.TargetDate.Date < DateTime.Now.Date).OrderByDescending(x => x.TargetDate);
         }
 
         public async Task CompleteUnfinished(string userId, int todoId)

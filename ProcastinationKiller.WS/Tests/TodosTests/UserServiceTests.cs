@@ -110,7 +110,7 @@ namespace TodosTests
 
             _ctx.Configure().GetUserById(1).Returns(user);
 
-            _userService.MarkAsCompleted(1, DateTime.Now, 1);
+            _userService.MarkAsCompleted(1, DateTime.Now, "1");
 
             Assert.Single(user.Events);
             Assert.Single(user.Events.OfType<TodoCompletedEvent>());
@@ -122,7 +122,7 @@ namespace TodosTests
             Assert.False(@event.Hidden);
         }
 
-        [Fact(DisplayName = "[UserService] Nie mo¿na wykonaæ todo na przysz³oœæ.")]
+        [Fact(DisplayName = "[UserService] Nie moï¿½na wykonaï¿½ todo na przyszï¿½oï¿½ï¿½.")]
         public async Task FinishTodoFromFuture_Error()
         {
             var user = new User()
@@ -144,7 +144,7 @@ namespace TodosTests
 
             _ctx.Configure().GetUserById(1).Returns(user);
 
-            var ex = await Record.ExceptionAsync(() => _userService.MarkAsCompleted(1, DateTime.Now, 1));
+            var ex = await Record.ExceptionAsync(() => _userService.MarkAsCompleted(1, DateTime.Now, "1"));
 
             Assert.NotNull(ex);
             Assert.IsType<NotAllowedOperation>(ex);
@@ -162,9 +162,9 @@ namespace TodosTests
                 CalculationService = new StateCalculationService(_ctx)
             };
 
-            _ctx.Configure().GetUserForLogin(user.Username, user.Password).Returns(user);
+            _ctx.Configure().GetUserForLogin("1").Returns(user);
 
-            _userService.Authenticate("test", "test", DateTime.Now);
+            _userService.Authenticate("1");
 
             Assert.Single(user.Events);
             Assert.Single(user.Events.OfType<DailyLoginEvent>());
@@ -186,10 +186,10 @@ namespace TodosTests
                 CalculationService = new StateCalculationService(_ctx)
             };
 
-            _ctx.Configure().GetUserForLogin(user.Username, user.Password).Returns(user);
+            _ctx.Configure().GetUserForLogin("1").Returns(user);
 
-            _userService.Authenticate("test", "test", DateTime.Now);
-            _userService.Authenticate("test", "test", DateTime.Now);
+            _userService.Authenticate("1");
+            _userService.Authenticate("1");
 
             Assert.Single(user.Events);
             Assert.Single(user.Events.OfType<DailyLoginEvent>());
@@ -200,7 +200,7 @@ namespace TodosTests
             Assert.False(@event.Hidden);
         }
 
-        [Fact(DisplayName = "[UserService] Logowanie dwa dni pod rz¹d dodaje dwie operacje.")]
+        [Fact(DisplayName = "[UserService] Logowanie dwa dni pod rzï¿½d dodaje dwie operacje.")]
         public void Login_AddsDailyLogin_TwoDays()
         {
             var user = new User()
@@ -211,7 +211,7 @@ namespace TodosTests
                 CalculationService = new StateCalculationService(_ctx)
             };
 
-            _ctx.Configure().GetUserForLogin(user.Username, user.Password).Returns(user);
+            _ctx.Configure().GetUserForLogin("1").Returns(user);
 
             List<DateTime> dates = new List<DateTime>()
             {
@@ -219,7 +219,7 @@ namespace TodosTests
                 DateTime.Now.AddDays(1)
             };
 
-            _userService.Authenticate("test", "test", dates[0]);
+            _userService.Authenticate("1");
 
             Assert.Single(user.Events);
             Assert.Single(user.Events.OfType<DailyLoginEvent>());
@@ -229,7 +229,7 @@ namespace TodosTests
             Assert.Equal(DateTime.Now.Date, @event.Date.Date);
             Assert.False(@event.Hidden);
 
-            _userService.Authenticate("test", "test", dates[1]);
+            _userService.Authenticate("1");
 
             Assert.Equal(2, user.Events.Count);
             Assert.Equal(2, user.Events.OfType<DailyLoginEvent>().Count());
@@ -242,7 +242,7 @@ namespace TodosTests
             });
         }
 
-        [Fact(DisplayName = "[UserService] 7 logowañ pod rz¹d dodaje te¿ tygodniowy event.")]
+        [Fact(DisplayName = "[UserService] 7 logowaï¿½ pod rzï¿½d dodaje teï¿½ tygodniowy event.")]
         public void Login_AddsDailyLogin_7Days()
         {
             var user = new User()
@@ -253,7 +253,7 @@ namespace TodosTests
                 CalculationService = new StateCalculationService(_ctx)
             };
 
-            _ctx.Configure().GetUserForLogin(user.Username, user.Password).Returns(user);
+            _ctx.Configure().GetUserForLogin("1").Returns(user);
 
             List<DateTime> dates = new List<DateTime>()
             {
@@ -268,7 +268,7 @@ namespace TodosTests
             };
 
             foreach (var date in dates)
-                _userService.Authenticate("test", "test", date);
+                _userService.Authenticate("1");
 
             Assert.Equal(9, user.Events.Count);
             Assert.Equal(8, user.Events.OfType<DailyLoginEvent>().Count());
@@ -321,9 +321,9 @@ namespace TodosTests
                 UserStatus = ProcastinationKiller.Models.Enums.UserStatus.New
             };
 
-            _ctx.Configure().GetUserForLogin(user.Username, user.Password).Returns(user);
+            _ctx.Configure().GetUserForLogin("1").Returns(user);
 
-            _userService.ActivateAccount(secret);
+            //_userService.ActivateAccount("1");
 
             Assert.True(user.Code.IsConfirmed);
             Assert.Equal(DateTime.Now.Date, user.Code.ConfirmationDate.GetValueOrDefault().Date);
