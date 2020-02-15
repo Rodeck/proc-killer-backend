@@ -7,9 +7,8 @@ RUN dotnet publish -c Release -o out
 
 # Build runtime image
 FROM microsoft/dotnet:2.1-aspnetcore-runtime
-RUN pwd
 WORKDIR /app
 RUN pwd
-COPY --from=build-env /app/DoItWebApi/out .
+COPY --from=build-env /out .
 ENV ASPNETCORE_URLS http://*:5000
 ENTRYPOINT ["dotnet", "ProcastinationKiller.dll"]
