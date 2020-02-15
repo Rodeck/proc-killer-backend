@@ -21,7 +21,7 @@
             "problemMatcher": "$msCompile",
             "dependsOn": ["print"],
             "options": {
-                "cwd": "${workspaceFolder}/src/DoIt.WebApi/"
+                "cwd": "${workspaceFolder}/src/DoItWebApi/"
             },
         },
         {
