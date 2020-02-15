@@ -1,5 +1,5 @@
 FROM microsoft/dotnet:2.1-sdk AS build-env
-COPY src /app
+COPY src/DoIt.WebApi /app
 WORKDIR /app
 
 RUN dotnet restore --configfile NuGet.Config
