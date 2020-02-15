@@ -18,14 +18,16 @@
             "presentation": {
                 "reveal": "silent"
             },
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "dependsOn": ["print"],
+            "options": {
+                "cwd": "${workspaceFolder}/src/DoIt.WebApi/"
+            },
         },
         {
             "label": "print",
-            "command": "${workspaceFolder}/ProcastinationKiller.WS/ProcastinationKiller",
+            "command": "dir",
             "type": "shell",
-            "args": [
-            ],
             "group": "build",
         }
     ]
