@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/DoItWebApi/bin/Debug/netcoreapp2.1/ProcastinationKiller.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.1/ProcastinationKiller.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/DoItWebApi/",
+            "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
