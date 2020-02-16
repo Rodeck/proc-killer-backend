@@ -14,4 +14,4 @@ WORKDIR /app
 COPY --from=build /build/out .
 EXPOSE 5000/tcp
 ENV ASPNETCORE_URLS http://*:5000
-ENTRYPOINT ["dotnet", 'run', 'server.urls' "http://*:5000"]
+ENTRYPOINT ["dotnet", "run", "server.urls" "http://*:5000"]
