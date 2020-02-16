@@ -12998,11 +12998,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\ProcastinationKiller.csproj",
+      "projectUniqueName": "C:\\projects\\proc-killer-backend\\src\\DoItWebApi\\ProcastinationKiller.csproj",
       "projectName": "ProcastinationKiller",
-      "projectPath": "c:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\ProcastinationKiller.csproj",
+      "projectPath": "C:\\projects\\proc-killer-backend\\src\\DoItWebApi\\ProcastinationKiller.csproj",
       "packagesPath": "C:\\Users\\Gabriel Pająk\\.nuget\\packages\\",
-      "outputPath": "c:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\obj\\",
+      "outputPath": "C:\\projects\\proc-killer-backend\\src\\DoItWebApi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Microsoft\\Xamarin\\NuGet\\",

@@ -22,17 +22,25 @@ namespace ProcastinationKiller.Services
 
         public async Task AssignBaseRewards(string userId)
         {
+            var existingBadges = _context.Badges
+                .Include(x => x.Definition)
+                    .ThenInclude(x => x.Conditions)
+                .Where(x => x.UserId == userId);
+
             foreach(var rewardDefinition in _context.BadgeDefinitions.Include(x => x.Conditions).Where(x => x.AssignableFormBeggining))
             {
                 _logger.LogInformation($"Assigning {rewardDefinition.Id} to user {userId}");
-                var reward = new Badge()
+                if (!existingBadges.Any(x => x.Definition.Id == rewardDefinition.Id))
                 {
-                    Definition = rewardDefinition,
-                    UserId = userId,
-                    Conditions = BuildConditions(rewardDefinition.Conditions.ToList()).ToList(),
-                };
+                    var reward = new Badge()
+                    {
+                        Definition = rewardDefinition,
+                        UserId = userId,
+                        Conditions = BuildConditions(rewardDefinition.Conditions.ToList()).ToList(),
+                    };
 
-                await _context.AddAsync(reward);
+                    await _context.AddAsync(reward);
+                }
             }
 
             await _context.SaveChangesAsync();

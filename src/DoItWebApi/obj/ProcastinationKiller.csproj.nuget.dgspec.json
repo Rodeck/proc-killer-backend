@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\ProcastinationKiller.csproj": {}
+    "c:\\projects\\proc-killer-backend\\src\\DoItWebApi\\ProcastinationKiller.csproj": {}
   },
   "projects": {
-    "C:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\ProcastinationKiller.csproj": {
+    "c:\\projects\\proc-killer-backend\\src\\DoItWebApi\\ProcastinationKiller.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\ProcastinationKiller.csproj",
+        "projectUniqueName": "c:\\projects\\proc-killer-backend\\src\\DoItWebApi\\ProcastinationKiller.csproj",
         "projectName": "ProcastinationKiller",
-        "projectPath": "C:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\ProcastinationKiller.csproj",
+        "projectPath": "c:\\projects\\proc-killer-backend\\src\\DoItWebApi\\ProcastinationKiller.csproj",
         "packagesPath": "C:\\Users\\Gabriel Pająk\\.nuget\\packages\\",
-        "outputPath": "C:\\projects\\proc-killer-backend\\src\\DoIt.WebApi\\obj\\",
+        "outputPath": "c:\\projects\\proc-killer-backend\\src\\DoItWebApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\",

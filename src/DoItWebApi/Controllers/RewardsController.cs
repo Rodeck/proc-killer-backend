@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DoItWebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,10 +28,32 @@ namespace ProcastinationKiller.Controllers
         }
 
         [HttpGet]
-        public Task<IEnumerable<Badge>> Rewards()
+        public async Task<IEnumerable<BadgeViewModel>> Rewards()
         {
             _logger.LogInformation($"Getting rewards for user {GetUserId()}");
-            return _rewardService.GetRewards(GetUserId());
+            var result = await _rewardService.GetRewards(GetUserId());
+
+            return result.Select(x => {
+                var conditions = x.Conditions.Select(y => new BadgeConditionViewModel()
+                {
+                    ActualAmount = y.Amount,
+                    Condition = Enum.GetName(typeof(Conditions), y.Condition),
+                    RequiredAmount = x.GetConditionDefinitin(y).Amount,
+                    Id = y.Id
+                });
+
+                var badge = new BadgeViewModel()
+                {
+                    AcquiredDate = x.AcquiredDate,
+                    Id = x.Id,
+                    IsFulfiled = x.IsFulfiled,
+                    Image = x.Definition.Image,
+                    Conditions = conditions,
+                    Percentage = (float)conditions.Sum(y => y.ActualAmount) / (float)conditions.Sum(y => y.RequiredAmount)
+                };
+
+                return badge;
+            });
         }
     }
 }
