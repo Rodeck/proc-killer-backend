@@ -5,7 +5,7 @@ export IMAGE_NAME=netcoreapps-doit
 export IMAGE_VERSION=latest
 
 export AWS_DEFAULT_REGION=eu-west-1
-export AWS_ECS_CLUSTER_NAME=DoItCI
+export AWS_ECS_CLUSTER_NAME=default
 export AWS_VIRTUAL_HOST=34.247.93.138
 
 # set any sensitive information in travis-ci encrypted project settings:
