@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.1-sdk AS build-env
+FROM microsoft/dotnet:2.1-sdk AS build
 COPY ProcastinationKiller.csproj /build/
 
 RUN dotnet restore ./build/ProcastinationKiller.csproj
