@@ -1,5 +1,5 @@
 {
-  "FilePath": "c:\\projects\\proc-killer-backend\\ProcastinationKiller.csproj",
+  "FilePath": "c:\\projects\\proc-killer-backend\\DoIt.csproj",
   "Configuration": {
     "ConfigurationName": "MVC-2.1",
     "LanguageVersion": "2.1",
@@ -2874,7 +2874,7 @@
     ],
     "CSharpLanguageVersion": 703
   },
-  "RootNamespace": "ProcastinationKiller",
+  "RootNamespace": null,
   "Documents": [],
   "SerializationFormat": "0.2"
 }
